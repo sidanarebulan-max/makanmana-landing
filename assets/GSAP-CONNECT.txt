@@ -1,0 +1,10 @@
+UPLOAD FILE:
+assets/gsap-animations.js
+
+THEN OPEN index.html AND PASTE THIS IMMEDIATELY BEFORE </body>:
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+<script src="/assets/gsap-animations.js"></script>
+
+Save/commit to main. Vercel Git integration will deploy the commit automatically.
