@@ -1,0 +1,13 @@
+{
+  "name":"MakanMana",
+  "short_name":"MakanMana",
+  "description":"Stop wondering. Start eating.",
+  "start_url":"/",
+  "scope":"/",
+  "display":"standalone",
+  "background_color":"#FFF9F2",
+  "theme_color":"#E1261C",
+  "icons":[
+    {"src":"/favicon-makanmana.png","sizes":"64x64","type":"image/png","purpose":"any"}
+  ]
+}
