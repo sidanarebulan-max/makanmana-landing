@@ -866,25 +866,25 @@
   const SUPABASE_KEY = 'sb_publishable_USNHq1Yh2pnAJxlCTo1G9Q_Wibdj_yf';
 
   async function saveMakanManaSubmission(payload) {
-    const response = await fetch(SUPABASE_URL + '/rest/v1/website_submissions', {
-      method: 'POST',
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify({
-        ...payload,
-        source_page: window.location.pathname,
-        metadata: {
-          referrer: document.referrer || null,
-          page_title: document.title
-        }
-      })
+    const meta={referrer:document.referrer||null,page_title:document.title};
+    let table,row;
+    if(payload.submission_type==='city_request'){
+      table='city_requests';
+      row={city:payload.city,email:payload.email,source_page:window.location.pathname,metadata:meta};
+    }else if(payload.submission_type==='ios_waitlist'){
+      table='ios_waitlist';
+      row={email:payload.email,source_page:window.location.pathname,metadata:meta};
+    }else{
+      throw new Error('Unsupported submission type');
+    }
+    const response=await fetch(SUPABASE_URL+'/rest/v1/'+table,{
+      method:'POST',
+      headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify(row)
     });
-    if (!response.ok) {
-      const message = await response.text();
-      throw new Error(message || 'Supabase submission failed');
+    if(!response.ok){
+      const message=await response.text();
+      throw new Error(message||'Supabase submission failed');
     }
   }
 
