@@ -220,7 +220,7 @@
 <header class="nav">
   <div class="wrap navrow">
     <a class="brand" href="index.html">
-      <img src="https://makanmana.app/__l5e/assets-v1/585f8837-154f-435d-84d7-c8f36424b07f/logo.png" alt="MakanMana logo">
+      <img src="/favicon-makanmana.png" alt="MakanMana logo">
       MakanMana
     </a>
     <nav class="navlinks">
@@ -229,7 +229,7 @@
       <a href="#coming">Akan Datang</a>
       <a href="#join">Daftar</a>
     </nav>
-    <a href="#join" class="btn btn-primary">Daftar Minat Merchant</a>
+    <a href="/daftar-kedai.html" class="btn btn-primary">Daftar Kedai</a>
   </div>
 </header>
 
@@ -242,7 +242,7 @@
         <h1 class="display hero-title">Tempat sedap<br>patut senang<br><span class="red">dijumpa.</span></h1>
         <p class="hero-copy">MakanMana dibina untuk membantu orang membuat keputusan makan dengan lebih cepat. Untuk merchant, itu bermaksud peluang lebih besar untuk kedai tempatan ditemui pada saat pelanggan sedang mencari tempat untuk makan.</p>
         <div class="hero-actions">
-          <a href="#join" class="btn btn-primary">Daftar Minat Merchant</a>
+          <a href="/daftar-kedai.html" class="btn btn-primary">Daftar Kedai</a>
           <a href="#coming" class="btn btn-outline">Lihat Apa Yang Akan Datang</a>
         </div>
         <div class="hero-note">Percuma untuk daftar minat · Tiada komitmen</div>
@@ -412,7 +412,7 @@
   <section class="final-cta">
     <div class="wrap">
       <h2 class="display">Kedai anda dah sedap.<br>Biar lebih ramai orang tahu.</h2>
-      <a href="#join" class="btn">Daftar Sebagai Merchant Awal</a>
+      <a href="/daftar-kedai.html" class="btn">Daftar Kedai Sekarang</a>
     </div>
   </section>
 
@@ -422,7 +422,7 @@
   <div class="wrap">
     <div class="footer-grid">
       <a class="brand" href="index.html">
-        <img src="https://makanmana.app/__l5e/assets-v1/585f8837-154f-435d-84d7-c8f36424b07f/logo.png" alt="MakanMana logo">
+        <img src="/favicon-makanmana.png" alt="MakanMana logo">
         MakanMana
       </a>
       <div class="footer-col">
@@ -466,10 +466,11 @@
   const MAKANMANA_SUPABASE_URL = 'https://omtcatriciyecudlvget.supabase.co';
   const MAKANMANA_SUPABASE_KEY = 'sb_publishable_USNHq1Yh2pnAJxlCTo1G9Q_Wibdj_yf';
   async function saveMakanManaSubmission(payload){
-    const response = await fetch(MAKANMANA_SUPABASE_URL + '/rest/v1/website_submissions', {
+    const row={shop_name:payload.shop_name,area:payload.area,contact_name:payload.name,whatsapp:payload.phone,email:payload.email,source_page:location.pathname,metadata:{referrer:document.referrer||null,page_title:document.title}};
+    const response = await fetch(MAKANMANA_SUPABASE_URL + '/rest/v1/merchant_waitlist', {
       method:'POST',
       headers:{apikey:MAKANMANA_SUPABASE_KEY,'Content-Type':'application/json',Prefer:'return=minimal'},
-      body:JSON.stringify({...payload,source_page:location.pathname,metadata:{referrer:document.referrer||null,page_title:document.title}})
+      body:JSON.stringify(row)
     });
     if(!response.ok) throw new Error(await response.text() || 'Submission failed');
   }
