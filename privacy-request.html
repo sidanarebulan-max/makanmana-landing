@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MakanMana | Pusat Permintaan Privasi</title>
+<meta name="description" content="Hantar permintaan akses, pembetulan, pemadaman, penarikan consent atau opt-out marketing kepada MakanMana.">
+<link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
+<link rel="apple-touch-icon" href="/favicon-makanmana.png">
+<meta name="theme-color" content="#E1261C">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--c:#fff9f2;--r:#e1261c;--i:#171310;--g:#6b655c;--l:#eadfd1;--w:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--c);color:var(--i);font-family:Inter,sans-serif}a{color:var(--r)}.w{max-width:820px;margin:auto;padding:0 26px}.display{font-family:Anton,sans-serif;text-transform:uppercase}.nav{border-bottom:1px solid var(--l)}.nr{height:74px;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;align-items:center;gap:10px;color:var(--i);text-decoration:none;font-weight:800}.brand img{width:32px;height:32px;border-radius:8px}.btn{border:0;border-radius:999px;background:var(--r);color:#fff;padding:12px 19px;font-weight:800;cursor:pointer;text-decoration:none}
+main{padding:60px 0 90px}h1{font-size:clamp(44px,7vw,72px);line-height:.95;margin:0 0 12px}.lead{color:var(--g);line-height:1.7}.card{background:#fff;border:1px solid var(--l);border-radius:20px;padding:24px;margin-top:28px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.f{display:flex;flex-direction:column;gap:7px}.f.full{grid-column:1/-1}.f label{font-size:11px;font-weight:800;text-transform:uppercase;color:var(--g);letter-spacing:.06em}.f input,.f select,.f textarea{border:1px solid var(--l);background:#fff;padding:13px 14px;border-radius:12px;font:inherit}.f textarea{min-height:140px}.note{font-size:12px;color:var(--g);line-height:1.6}.msg{display:none;margin:16px 0;padding:13px;border-radius:12px}.msg.on{display:block}.msg.ok{background:#eff8f1;color:#1f6330}.msg.err{background:#fff0ee;color:#9c1b15}.trap{position:absolute;left:-9999px}@media(max-width:650px){.grid{grid-template-columns:1fr}.f.full{grid-column:auto}.w{padding:0 18px}}
+</style>
+</head>
+<body>
+<header class="nav"><div class="w nr"><a class="brand" href="/"><img src="/favicon-makanmana.png" alt="MakanMana">MakanMana</a><a class="btn" href="/privacy.html">Notis Privasi</a></div></header>
+<main><div class="w">
+<h1 class="display">Pusat Permintaan Privasi</h1>
+<p class="lead">Gunakan borang ini untuk meminta akses, pembetulan atau pemadaman data, menarik balik consent pemprosesan, atau berhenti menerima marketing. Kami mungkin meminta maklumat tambahan yang munasabah untuk mengesahkan identiti sebelum tindakan dibuat.</p>
+<div class="card">
+<div id="ok" class="msg ok">Permintaan anda telah diterima. Simpan e-mel yang digunakan supaya kami boleh menghubungi anda jika pengesahan tambahan diperlukan.</div>
+<div id="err" class="msg err"></div>
+<form id="f">
+<div class="trap"><input name="company_fax" autocomplete="off"></div>
+<div class="grid">
+<div class="f"><label>Nama</label><input name="name" maxlength="160"></div>
+<div class="f"><label>E-mel *</label><input name="email" required type="email" maxlength="250"></div>
+<div class="f"><label>Telefon</label><input name="phone" maxlength="40"></div>
+<div class="f"><label>Jenis permintaan *</label><select name="type" required><option value="access">Akses data</option><option value="correction">Pembetulan data</option><option value="deletion">Pemadaman data</option><option value="withdraw_consent">Tarik balik consent</option><option value="marketing_opt_out">Opt-out marketing</option><option value="other">Lain-lain</option></select></div>
+<div class="f full"><label>Butiran permintaan *</label><textarea name="message" required maxlength="2000" placeholder="Terangkan data atau permohonan yang berkaitan. Jangan hantar MyKad, kata laluan atau maklumat bank."></textarea></div>
+</div>
+<p class="note">Permintaan ini akan direkodkan untuk tujuan pengendalian hak privasi. Jangan masukkan dokumen identiti sensitif dalam borang ini. Jika perlu pengesahan lanjut, MakanMana akan menghubungi anda melalui e-mel yang diberikan.</p>
+<button id="send" class="btn" type="submit">Hantar Permintaan Privasi</button>
+</form>
+</div>
+</div></main>
+<script>
+const URL='https://omtcatriciyecudlvget.supabase.co',KEY='sb_publishable_USNHq1Yh2pnAJxlCTo1G9Q_Wibdj_yf',F=document.getElementById('f'),B=document.getElementById('send'),OK=document.getElementById('ok'),ER=document.getElementById('err');
+F.onsubmit=async e=>{e.preventDefault();OK.classList.remove('on');ER.classList.remove('on');if(F.company_fax.value)return;B.disabled=true;B.textContent='Menghantar...';try{
+ const type=F.type.value; const row={name:F.name.value.trim()||null,email:F.email.value.trim().toLowerCase(),phone:F.phone.value.trim()||null,subject:'Privacy request: '+type,message:F.message.value.trim(),source_page:location.pathname,metadata:{request_type:type,source:'privacy-request-centre',privacy_notice_version:'privacy-2026-09-30',submitted_at:new Date().toISOString()}};
+ const r=await fetch(URL+'/rest/v1/contact_submissions',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify(row)});
+ if(!r.ok)throw new Error(await r.text()||'submission_failed');F.reset();OK.classList.add('on');OK.scrollIntoView({behavior:'smooth'})
+}catch(x){ER.textContent='Permintaan belum berjaya dihantar. Sila cuba lagi atau e-mel hello@makanmana.app.';ER.classList.add('on')}finally{B.disabled=false;B.textContent='Hantar Permintaan Privasi'}};
+</script>
+</body>
+</html>
