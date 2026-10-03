@@ -57,6 +57,14 @@ Deno.serve(async(req:Request)=>{
   const [analytics,ios,cities,contacts,drafts]=await Promise.all([db.rpc('merchant_admin_analytics',{p_days:Number(p.days)||30}),all('ios_waitlist'),all('city_requests'),all('contact_submissions'),db.from('merchant_intake_drafts').select('id,status,created_at,expires_at,registration_id').order('created_at',{ascending:false}).limit(100)]);
   return response({ok:true,registrations,waitlist:d.waitlist.map(r=>({...r,review:d.reviews.find(x=>x.entity_type==='waitlist'&&x.entity_id===r.id)||null})).sort((a,b)=>b.created_at.localeCompare(a.created_at)),analytics:checked(analytics),ios,cities,contacts,drafts:checked(drafts),refreshed_at:new Date().toISOString()});
  }
+ if(p.action==='activity'){
+  const days=[7,30,90].includes(Number(p.days))?Number(p.days):30;
+  const offset=Math.max(0,Math.min(1000000,Math.floor(Number(p.offset)||0)));
+  const cutoff=p.cutoff&&Number.isFinite(Date.parse(p.cutoff))?new Date(p.cutoff).toISOString():new Date().toISOString();
+  const since=new Date(new Date(cutoff).getTime()-days*86400000).toISOString();
+  const result=await db.from('site_activity_events').select('id,event_type,page,target,device,referrer_host,utm_source,utm_campaign,created_at',{count:'exact'}).gte('created_at',since).lte('created_at',cutoff).order('created_at',{ascending:false}).order('id',{ascending:false}).range(offset,offset+49);
+  if(result.error)throw result.error;return response({ok:true,events:result.data,total:result.count,cutoff});
+ }
  if(p.action==='detail'){
   if(!['registration','waitlist'].includes(p.type)||!/^[-a-f0-9]{36}$/.test(p.id))return response({error:'invalid_entity'},400);
   const row=checked(await db.from(p.type==='registration'?'merchant_registrations':'merchant_waitlist').select('*').eq('id',p.id).single());
