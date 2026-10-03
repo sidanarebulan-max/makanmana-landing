@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sahkan Semula Persetujuan | MakanMana</title>
+<meta name="description" content="Sahkan semula persetujuan pendaftaran merchant MakanMana.">
+<link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
+<link rel="apple-touch-icon" href="/favicon-makanmana.png">
+<meta name="theme-color" content="#E1261C">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff9f2;--red:#e1261c;--ink:#171310;--muted:#6b655c;--line:#eadfd1;--white:#fff;--green:#137a3d}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,sans-serif}.w{max-width:760px;margin:auto;padding:0 24px}
+nav{border-bottom:1px solid var(--line);background:#fff9f2f2;position:sticky;top:0;backdrop-filter:blur(14px)}.nav{height:72px;display:flex;align-items:center;gap:10px;font-weight:800}.nav img{width:32px;height:32px;border-radius:8px}
+main{padding:56px 0 80px}.eyebrow{font-size:12px;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:.12em}.title{font-family:"Bebas Neue",sans-serif;font-size:clamp(52px,10vw,86px);line-height:.88;margin:10px 0 18px;text-transform:uppercase}.lead{color:var(--muted);line-height:1.7;margin-bottom:30px}
+.card{background:var(--white);border:1px solid var(--line);border-radius:24px;padding:28px;box-shadow:0 18px 50px #3322110b}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.full{grid-column:1/-1}label{display:block;font-size:13px;font-weight:800;margin-bottom:7px}input[type=text],input[type=email]{width:100%;padding:14px 15px;border:1px solid #d9cdbf;border-radius:12px;font:inherit;background:#fff;color:var(--ink);outline:none}input:focus{border-color:var(--red);box-shadow:0 0 0 3px #e1261c12}
+.check{display:flex;align-items:flex-start;gap:10px;padding:13px 0;border-top:1px solid #f0e7dc;font-size:13px;line-height:1.55}.check input{margin-top:3px;accent-color:var(--red)}a{color:var(--red);font-weight:700}.note{font-size:12px;color:var(--muted);line-height:1.6;margin:18px 0}.btn{width:100%;border:0;border-radius:999px;background:var(--red);color:#fff;font:inherit;font-weight:800;padding:14px 20px;cursor:pointer}.btn:disabled{opacity:.55;cursor:not-allowed}.msg{display:none;margin-top:18px;padding:14px;border-radius:14px;font-size:13px;line-height:1.55}.msg.on{display:block}.msg.ok{background:#edf9f0;color:var(--green);border:1px solid #bfe3c8}.msg.bad{background:#fff0ee;color:#a61b14;border:1px solid #f1c1bc}
+footer{padding:30px 0;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+@media(max-width:640px){.grid{grid-template-columns:1fr}.card{padding:22px}.title{font-size:58px}}
+</style>
+</head>
+<body>
+<nav><div class="w nav"><img src="/favicon-makanmana.png" alt="">MakanMana</div></nav>
+<main><div class="w">
+<div class="eyebrow">Merchant Verification</div>
+<h1 class="title">SAHKAN SEMULA<br>PERSETUJUAN.</h1>
+<p class="lead">Kami telah menaik taraf sistem merchant MakanMana. Jika pendaftaran anda dibuat sebelum kemas kini ini, sila sahkan semula persetujuan di bawah supaya permohonan boleh diproses dalam Control Center tanpa kehilangan rekod asal.</p>
+<div class="card">
+<form id="f">
+<div class="grid">
+<div class="full"><label for="ref">Reference pendaftaran *</label><input id="ref" name="referenceCode" type="text" required maxlength="80" placeholder="Contoh: MM-20261001-ABC123"></div>
+<div><label for="email">E-mel berdaftar *</label><input id="email" name="email" type="email" required maxlength="254"></div>
+<div><label for="last4">4 digit akhir telefon *</label><input id="last4" name="phoneLast4" type="text" required inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="Contoh: 6964"></div>
+<div class="full">
+<div class="check"><input id="processing" type="checkbox" required><label for="processing">Saya bersetuju MakanMana memproses maklumat pendaftaran merchant untuk tujuan semakan, pengurusan profil kedai dan operasi platform.</label></div>
+<div class="check"><input id="privacy" type="checkbox" required><label for="privacy">Saya telah membaca dan menerima <a href="/privacy.html" target="_blank" rel="noopener">Privacy Notice MakanMana</a>.</label></div>
+<div class="check"><input id="terms" type="checkbox" required><label for="terms">Saya telah membaca dan menerima <a href="/terms.html" target="_blank" rel="noopener">Merchant Terms MakanMana</a>.</label></div>
+<div class="check"><input id="accuracy" type="checkbox" required><label for="accuracy">Saya mengesahkan maklumat yang dihantar dalam pendaftaran merchant saya adalah benar dan saya mempunyai kuasa untuk mengemukakannya.</label></div>
+<div class="check"><input id="marketing" type="checkbox"><label for="marketing">Saya mahu menerima kemas kini, promosi dan komunikasi pemasaran MakanMana. (Pilihan)</label></div>
+</div>
+</div>
+<p class="note">Persetujuan ini akan direkodkan bersama versi polisi semasa dan masa pengesahan. Pilihan pemasaran tidak menjejaskan status permohonan merchant anda.</p>
+<button class="btn" id="send" type="submit">Sahkan persetujuan</button>
+<div id="msg" class="msg"></div>
+</form>
+</div>
+</div></main>
+<footer><div class="w">© 2026 MakanMana · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></div></footer>
+<script>
+const EP='https://omtcatriciyecudlvget.supabase.co/functions/v1/merchant-intake-v3';
+const KEY='sb_publishable_USNHq1Yh2pnAJxlCTo1G9Q_Wibdj_yf';
+const f=document.getElementById('f'),btn=document.getElementById('send'),msg=document.getElementById('msg');
+const qs=new URLSearchParams(location.search);if(qs.get('ref'))document.getElementById('ref').value=qs.get('ref');
+function show(text,ok){msg.textContent=text;msg.className='msg on '+(ok?'ok':'bad')}
+f.onsubmit=async e=>{
+ e.preventDefault();if(!f.reportValidity())return;
+ btn.disabled=true;msg.className='msg';
+ try{
+  const body={
+   action:'refresh_consent',
+   referenceCode:document.getElementById('ref').value.trim(),
+   email:document.getElementById('email').value.trim(),
+   phoneLast4:document.getElementById('last4').value.trim(),
+   processingConsent:document.getElementById('processing').checked,
+   privacyNoticeAccepted:document.getElementById('privacy').checked,
+   termsAccepted:document.getElementById('terms').checked,
+   accuracyConfirmed:document.getElementById('accuracy').checked,
+   marketingOptIn:document.getElementById('marketing').checked
+  };
+  const r=await fetch(EP,{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok||!d.ok)throw new Error(d.error||'request_failed');
+  if(d.status==='already_complete')show('Persetujuan anda sudah lengkap. Tiada tindakan lanjut diperlukan.',true);
+  else show('Berjaya. Persetujuan anda telah disahkan dan permohonan kini boleh diteruskan untuk semakan.',true);
+  f.querySelectorAll('input').forEach(x=>x.disabled=true);btn.style.display='none';
+ }catch(x){
+  const map={too_many_attempts:'Terlalu banyak cubaan. Cuba semula selepas satu jam.',verification_failed:'Maklumat pengesahan tidak sepadan dengan rekod pendaftaran. Semak reference, e-mel dan 4 digit akhir telefon.',consent_required:'Semua persetujuan wajib perlu ditanda.',server_error:'Sistem belum dapat memproses pengesahan. Cuba semula kemudian.'};
+  show(map[x.message]||'Pengesahan belum berjaya. Semak maklumat dan cuba lagi.',false);
+ }finally{btn.disabled=false}
+};
+</script>
+</body>
+</html>
