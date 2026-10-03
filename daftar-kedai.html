@@ -227,7 +227,7 @@ async function prepareEvidenceFile(f){
 }
 function csv(s){return [...new Set(String(s||'').split(',').map(x=>x.trim()).filter(Boolean))].slice(0,20)}
 function checks(n){return [...document.querySelectorAll('[data-g="'+n+'"] input:checked')].map(x=>x.value)}
-function validPage(){clearErr();for(const x of P[S].querySelectorAll('input,select,textarea')){if(x.offsetParent!==null&&!x.checkValidity()){x.reportValidity();return false}}
+function validPage(){clearErr();for(const x of P[S].querySelectorAll('input,select,textarea')){if(x.offsetParent!==null&&!x.checkValidity()){const label=x.closest('.f')?.querySelector('label')?.textContent?.trim()||x.name||'medan wajib';err('Lengkapkan bahagian ini dahulu: '+label+'.');x.focus({preventScroll:true});x.reportValidity();return false}}
  if(S===2){const map=val('googleMapsUrl'),lat=val('latitude'),lng=val('longitude');if(!map&&!(lat&&lng)){err('Wajib beri pautan Google Maps ATAU sepasang koordinat latitude dan longitude.');return false}if((lat&&!lng)||(!lat&&lng)){err('Isi kedua-dua latitude dan longitude, atau kosongkan kedua-duanya.');return false}}
  return true}
 PRE.onclick=()=>show(S-1);NXT.onclick=()=>{if(validPage())show(S+1)};T.forEach((x,i)=>x.onclick=()=>{if(i<=S||validPage())show(i)});
@@ -240,7 +240,7 @@ F.elements.deferEvidence?.addEventListener('change',e=>{if(e.target.checked){F.e
  const input=F.elements[name];if(!input)return;
  input.addEventListener('change',()=>{
    const f=input.files?.[0]||null;
-   if(!f){setFileFeedback(name,null);return}
+   if(!f){if(name==='evidence'){setFileFeedback(name,null,false,'Fail tidak masuk dari telefon. Cuba pilih semula, guna screenshot/JPG/PDF, atau pilih “Hantar dokumen kemudian”.');err('Dokumen bukti tidak berjaya dibaca oleh browser. Anda masih boleh teruskan dengan “Hantar dokumen kemudian”.')}else setFileFeedback(name,null);return}
    if(name==='evidence'){
      if(!(isPdf(f)||isKnownImage(f))){input.value='';setFileFeedback(name,null,false,'Fail tidak disokong. Pilih PDF atau gambar, atau pilih Hantar dokumen kemudian.');err('Dokumen bukti tidak diterima. Cuba PDF/JPG/PNG, atau pilih “Hantar dokumen kemudian” dan teruskan pendaftaran.');return}
      if(isPdf(f)&&f.size>8*1024*1024){input.value='';setFileFeedback(name,null,false,'PDF terlalu besar. Maksimum 8MB. Anda boleh hantar kemudian.');err('PDF melebihi 8MB. Kecilkan fail atau pilih “Hantar dokumen kemudian” supaya pendaftaran tidak tersekat.');return}
