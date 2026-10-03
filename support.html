@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Support | Makan Mana</title>
+<meta name="description" content="Get help with your Makan Mana account, subscriptions, food discovery, privacy and technical issues.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://www.makanmana.app/support">
+<link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
+<link rel="apple-touch-icon" href="/favicon-makanmana.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#DD1F22">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--red:#DD1F22;--dark:#D63F32;--soft:#DA6364;--orange:#F59E14;--warm:#FDF8F4;--off:#F6E9E3;--white:#fff;--ink:#211A17;--muted:#6C625D;--line:#E9DDD7;--green:#1F6F43}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--warm);color:var(--ink);font-family:Inter,Arial,sans-serif;-webkit-font-smoothing:antialiased}a{color:var(--red);text-decoration-thickness:1px;text-underline-offset:3px}.wrap{max-width:1040px;margin:auto;padding:0 28px}.display{font-family:Anton,Impact,sans-serif;text-transform:uppercase;letter-spacing:.01em}
+.nav{position:sticky;top:0;z-index:10;background:rgba(253,248,244,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(14px)}.navrow{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{display:flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;font-weight:800}.brand img{width:32px;height:32px;border-radius:8px}.navlinks{display:flex;gap:20px;font-size:13px;font-weight:700}.home{display:inline-flex;align-items:center;justify-content:center;padding:10px 16px;border:1px solid var(--line);border-radius:999px;color:var(--ink);text-decoration:none;background:#fff}
+.hero{padding:68px 0 30px}.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--red);font-weight:800}.hero h1{font-size:clamp(48px,8vw,82px);line-height:.93;margin:12px 0 18px}.hero .sub{font-size:17px;line-height:1.7;color:var(--muted);max-width:740px;margin:0}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:26px 0 34px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;min-height:180px}.card .icon{width:38px;height:38px;border-radius:12px;background:#FFF0ED;display:grid;place-items:center;color:var(--red);font-weight:900;margin-bottom:16px}.card h2{font-size:17px;margin:0 0 9px}.card p{font-size:13px;line-height:1.65;color:var(--muted);margin:0}.card a{font-size:13px;font-weight:800;display:inline-block;margin-top:10px}
+.section{background:#fff;border:1px solid var(--line);border-radius:22px;padding:30px;margin:20px 0}.section h2{font-size:27px;margin:0 0 8px}.section .lead{color:var(--muted);font-size:14px;line-height:1.7;margin:0 0 22px}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{display:flex;flex-direction:column;gap:7px}.field.full{grid-column:1/-1}.field label{font-size:12px;font-weight:800;color:var(--muted)}.field input,.field select,.field textarea{width:100%;border:1px solid #DCCFC8;border-radius:12px;padding:13px 14px;font:inherit;background:#fff;color:var(--ink);outline:none}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(221,31,34,.08)}.field textarea{min-height:150px;resize:vertical}.hint{font-size:12px;color:#92847D;line-height:1.55}.trap{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
+.btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:999px;padding:13px 20px;font-weight:800;font-size:13px;text-decoration:none;cursor:pointer}.btn.red{background:var(--red);color:#fff}.btn.out{background:#fff;border:1px solid var(--line);color:var(--ink)}.btn:disabled{opacity:.55;cursor:not-allowed}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.msg{display:none;margin-top:16px;padding:13px 15px;border-radius:12px;font-size:13px;line-height:1.55}.msg.on{display:block}.msg.ok{background:#EFF8F2;color:var(--green);border:1px solid #C7E6D2}.msg.err{background:#FFF0ED;color:#9A1C1F;border:1px solid #F2C7C3}
+.delete{background:linear-gradient(135deg,#FFF0ED,#FFF8F4);border:1px solid #F0D7D2}.delete h2{margin-bottom:10px}.delete p{color:var(--muted);line-height:1.7;font-size:14px}
+.faq{border-top:1px solid var(--line);padding:18px 0}.faq:last-child{border-bottom:1px solid var(--line)}.faq h3{font-size:15px;margin:0 0 7px}.faq p{font-size:13px;line-height:1.65;color:var(--muted);margin:0}
+footer{border-top:1px solid var(--line);margin-top:52px;padding:34px 0 46px}.footrow{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap}.footlinks{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;font-weight:700}.copy{font-size:12px;color:#9B8E87;margin-top:8px}
+@media(max-width:850px){.grid{grid-template-columns:1fr 1fr}.navlinks{display:none}}@media(max-width:620px){.wrap{padding:0 18px}.grid{grid-template-columns:1fr}.formgrid{grid-template-columns:1fr}.field.full{grid-column:auto}.hero{padding-top:46px}.hero h1{font-size:54px}.section{padding:21px}.footrow{flex-direction:column}}
+</style>
+<script defer src="/assets/site-track.js"></script>
+</head>
+<body>
+<header class="nav"><div class="wrap navrow">
+<a class="brand" href="/"><img src="/favicon-makanmana.png" alt="Makan Mana logo">Makan Mana</a>
+<nav class="navlinks"><a href="/privacy">Privacy</a><a href="/terms.html">Terms</a><a href="/hubungi.html">Contact</a></nav>
+<a class="home" href="/">Back to Home</a>
+</div></header>
+
+<main class="wrap">
+<div class="hero">
+<div class="eyebrow">Help Centre</div>
+<h1 class="display">Makan Mana Support</h1>
+<p class="sub">Need help? We're here to help you with your Makan Mana account and experience.</p>
+</div>
+
+<div class="grid">
+<div class="card"><div class="icon">01</div><h2>Account &amp; Login</h2><p>Get help with signing in, account access, profile information or verification.</p><a href="#contact" data-category="Account & Login">Contact support</a></div>
+<div class="card"><div class="icon">02</div><h2>Subscriptions &amp; Billing</h2><p>Get help with Makan Mana Plus, Makan Mana Pro, subscription status, restoration and billing-related questions.</p><a href="#billing">Manage subscriptions</a></div>
+<div class="card"><div class="icon">03</div><h2>Food Discovery &amp; Location</h2><p>Get help with nearby food discovery, location permissions, restaurant information and MakanMana Pilih.</p><a href="#contact" data-category="Restaurant / Place Information">Contact support</a></div>
+<div class="card"><div class="icon">04</div><h2>Community &amp; Content</h2><p>Report problems involving posts, comments, reviews, profiles or other community content.</p><a href="#contact" data-category="Community & Content">Report an issue</a></div>
+<div class="card"><div class="icon">05</div><h2>Technical Problems</h2><p>Report crashes, loading issues, unexpected behaviour or other technical problems.</p><a href="#contact" data-category="Technical Problem">Report a problem</a></div>
+<div class="card"><div class="icon">06</div><h2>Privacy &amp; Data Requests</h2><p>Contact us about privacy questions, data access, corrections or account/data deletion requests.</p><a href="/privacy">Read Privacy Policy</a></div>
+</div>
+
+<section class="section" id="billing">
+<h2>Subscriptions &amp; Billing</h2>
+<p class="lead">Subscription management is handled by the store where the purchase was made.</p>
+<p><strong>Apple App Store:</strong> Manage or cancel eligible subscriptions from your Apple ID / App Store subscription settings. Purchase restoration, refunds and billing availability are subject to Apple's platform rules.</p>
+<p><strong>Google Play:</strong> Manage or cancel eligible subscriptions from Google Play subscription settings. Purchase restoration, refunds and billing availability are subject to Google Play's platform rules.</p>
+<p class="hint">Makan Mana does not provide a separate fake cancellation system for store-billed subscriptions.</p>
+</section>
+
+<section class="section delete" id="deletion">
+<div class="eyebrow">Account &amp; Privacy</div>
+<h2>Request Account Deletion</h2>
+<p>You can request deletion of your Makan Mana account and associated personal information. If an in-app deletion option is available in your app version, check <strong>Profile → Settings / Help &amp; Support → Account or Privacy options → Request Account Deletion</strong>.</p>
+<p>If you do not see that option, use the existing Makan Mana Privacy Request Centre. The request is reviewed through the existing support/privacy workflow; this page does not directly delete a production account from the browser.</p>
+<div class="actions"><a class="btn red" href="/privacy-request.html">Request Account Deletion</a><a class="btn out" href="/privacy">Read Privacy Policy</a></div>
+</section>
+
+<section class="section" id="contact">
+<h2>Contact Support</h2>
+<p class="lead">Send a support request using the existing Makan Mana support database. Please do not include passwords, payment card numbers, MyKad details or other unnecessary sensitive information.</p>
+<div id="success" class="msg ok">Your support request has been received. We may contact you by email if more information is needed.</div>
+<div id="error" class="msg err"></div>
+<form id="supportForm">
+<div class="trap" aria-hidden="true"><label>Company fax<input name="company_fax" autocomplete="off" tabindex="-1"></label></div>
+<div class="formgrid">
+<div class="field"><label for="name">Name *</label><input id="name" name="name" required maxlength="160" autocomplete="name"></div>
+<div class="field"><label for="email">Email *</label><input id="email" name="email" required type="email" maxlength="250" autocomplete="email"></div>
+<div class="field"><label for="category">Category *</label><select id="category" name="category" required>
+<option value="">Select a category</option>
+<option>Account &amp; Login</option>
+<option>Subscription &amp; Billing</option>
+<option>Restaurant / Place Information</option>
+<option>Community &amp; Content</option>
+<option>Technical Problem</option>
+<option>Privacy &amp; Data Request</option>
+<option>Account Deletion</option>
+<option>Feedback</option>
+<option>Other</option>
+</select></div>
+<div class="field"><label for="subject">Subject *</label><input id="subject" name="subject" required maxlength="180"></div>
+<div class="field full"><label for="message">Message *</label><textarea id="message" name="message" required maxlength="3000" placeholder="Tell us what happened, what you expected, and any useful context."></textarea><div class="hint">Screenshots are not uploaded through this form. If one is needed, our support team may ask you to reply by email.</div></div>
+</div>
+<div class="actions"><button id="send" class="btn red" type="submit">Send Support Request</button><a class="btn out" href="mailto:hello@makanmana.app">Email hello@makanmana.app</a></div>
+</form>
+</section>
+
+<section class="section" id="faq">
+<h2>Frequently Asked Questions</h2>
+<div class="faq"><h3>How do I manage my subscription?</h3><p>Use the subscription settings for the store where you purchased it: Apple App Store on iOS or Google Play on Android.</p></div>
+<div class="faq"><h3>How do I restore a purchase?</h3><p>Use the restore or subscription options available in the app and the applicable store. If the entitlement still does not appear, send a support request with the platform and subscription product involved.</p></div>
+<div class="faq"><h3>Why does Makan Mana request location access?</h3><p>Location helps Makan Mana find nearby places, calculate distance and provide area-based food discovery. You control location permission from your device settings.</p></div>
+<div class="faq"><h3>How do I report incorrect restaurant information?</h3><p>Select <strong>Restaurant / Place Information</strong> in the support form and explain what appears to be incorrect.</p></div>
+<div class="faq"><h3>How do I report inappropriate community content?</h3><p>Select <strong>Community &amp; Content</strong> in the support form and provide enough context for the report to be reviewed.</p></div>
+<div class="faq"><h3>How do I request account deletion?</h3><p>Use the <a href="/privacy-request.html">Privacy Request Centre</a> or the in-app deletion option where available. Some records may be retained where required for legal, security or fraud-prevention purposes.</p></div>
+<div class="faq"><h3>How do I contact Makan Mana support?</h3><p>Use the form above or email <a href="mailto:hello@makanmana.app">hello@makanmana.app</a>.</p></div>
+</section>
+</main>
+
+<footer><div class="wrap footrow">
+<div><a class="brand" href="/"><img src="/favicon-makanmana.png" alt="Makan Mana">Makan Mana</a><div class="copy">© 2026 Makan Mana.</div></div>
+<div class="footlinks"><a href="/privacy">Privacy Policy</a><a href="/support">Support</a><a href="/terms.html">Terms</a><a href="/hubungi.html">Contact</a></div>
+</div></footer>
+
+<script>
+const SUPABASE_URL='https://omtcatriciyecudlvget.supabase.co';
+const SUPABASE_KEY='sb_publishable_USNHq1Yh2pnAJxlCTo1G9Q_Wibdj_yf';
+const form=document.getElementById('supportForm'),send=document.getElementById('send'),success=document.getElementById('success'),errorBox=document.getElementById('error');
+document.querySelectorAll('[data-category]').forEach(a=>a.addEventListener('click',()=>{const select=document.getElementById('category');select.value=a.dataset.category||'';}));
+form.addEventListener('submit',async e=>{
+  e.preventDefault();success.classList.remove('on');errorBox.classList.remove('on');
+  if(!form.reportValidity())return;
+  if(form.company_fax.value)return;
+  send.disabled=true;const original=send.textContent;send.textContent='Sending...';
+  try{
+    const category=form.category.value.trim();
+    const row={
+      name:form.name.value.trim(),
+      email:form.email.value.trim().toLowerCase(),
+      phone:null,
+      subject:'['+category+'] '+form.subject.value.trim(),
+      message:form.message.value.trim(),
+      source_page:location.pathname,
+      metadata:{
+        support_category:category,
+        source:'public-support-page',
+        privacy_policy_version:'2026-10-03',
+        submitted_at:new Date().toISOString()
+      }
+    };
+    const r=await fetch(SUPABASE_URL+'/rest/v1/contact_submissions',{
+      method:'POST',
+      headers:{apikey:SUPABASE_KEY,'Content-Type':'application/json',Prefer:'return=minimal'},
+      body:JSON.stringify(row)
+    });
+    if(!r.ok)throw new Error('submission_failed');
+    form.reset();success.classList.add('on');success.scrollIntoView({behavior:'smooth',block:'center'});
+  }catch(e){
+    errorBox.textContent='Your request could not be sent. Please try again or email hello@makanmana.app.';
+    errorBox.classList.add('on');
+  }finally{send.disabled=false;send.textContent=original}
+});
+const qp=new URLSearchParams(location.search).get('category');
+if(qp){const s=document.getElementById('category');[...s.options].some(o=>o.value.toLowerCase()===qp.toLowerCase()?(s.value=o.value,true):false)}
+</script>
+</body>
+</html>
