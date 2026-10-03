@@ -15,7 +15,6 @@ function gaps(r:any,media:any[],evidence:any[],menus:any[]){const out=Object.ent
  if(!r.google_maps_url&&(r.latitude==null||r.longitude==null))out.push('Google Maps atau koordinat');
  for(const role of ['storefront','food','menu'])if(!media.some(x=>x.registration_id===r.id&&x.role===role))out.push(({storefront:'Gambar hadapan kedai',food:'Gambar makanan',menu:'Gambar menu berharga'} as any)[role]);
  if(!evidence.some(x=>x.registration_id===r.id))out.push('Dokumen bukti');
- const menu=menus.find(x=>x.registration_id===r.id)?.menu_items||[];if(!menu.length)out.push('Senarai menu dengan harga');
  if(!r.opening_hours||Object.keys(r.opening_hours).length<7)out.push('Waktu operasi 7 hari');
  if(!r.accuracy_confirmed)out.push('Pengesahan ketepatan');
  if(r.processing_consent!==true)out.push('Rekod persetujuan pemprosesan');
