@@ -214,6 +214,7 @@
   .footer-bottom{font-size:12.5px;color:var(--gray-soft);border-top:1px solid var(--line);padding-top:22px;}
   @media(max-width:900px){.footer-grid{grid-template-columns:1fr 1fr;}}
 </style>
+<script defer src="/assets/site-track.js"></script>
 </head>
 <body>
 
@@ -480,8 +481,8 @@
     button.disabled=true; button.textContent='Menghantar...';
     try{
       await saveMakanManaSubmission({submission_type:'merchant_waitlist',shop_name:String(data.get('shop')||'').trim(),area:String(data.get('area')||'').trim(),name:String(data.get('name')||'').trim(),phone:String(data.get('whatsapp')||'').trim(),email:String(data.get('email')||'').trim().toLowerCase()||null});
-      form.reset(); alert('Terima kasih! Kedai anda sudah masuk dalam senarai merchant awal MakanMana.');
-    }catch(err){console.error(err);alert('Maaf, maklumat belum berjaya disimpan. Sila cuba lagi.');}
+      window.MMTrack?.send('submit_success',{target:'merchant_waitlist'});form.reset(); alert('Terima kasih! Kedai anda sudah masuk dalam senarai merchant awal MakanMana.');
+    }catch(err){window.MMTrack?.send('submit_error',{target:'merchant_waitlist'});console.error(err);alert('Maaf, maklumat belum berjaya disimpan. Sila cuba lagi.');}
     finally{button.disabled=false;button.textContent=old;}
   });
 </script>

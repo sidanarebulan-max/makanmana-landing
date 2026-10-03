@@ -498,6 +498,7 @@
   ]
 }
 </script>
+<script defer src="/assets/site-track.js"></script>
 </head>
 <body>
 
@@ -897,11 +898,11 @@
       const originalText = button ? button.textContent : '';
       if (button) { button.disabled = true; button.textContent = 'Menghantar...'; }
       try {
-        await saveMakanManaSubmission(buildPayload(form));
+        await saveMakanManaSubmission(buildPayload(form));window.MMTrack?.send('submit_success',{target:form.id});
         form.reset();
         alert(successMessage);
       } catch (error) {
-        console.error(error);
+        window.MMTrack?.send('submit_error',{target:form.id});console.error(error);
         alert('Maaf, maklumat belum berjaya disimpan. Sila cuba lagi.');
       } finally {
         if (button) { button.disabled = false; button.textContent = originalText; }
