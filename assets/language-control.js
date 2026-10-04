@@ -1,0 +1,1 @@
+(function(){const lang=localStorage.getItem('mmSiteLang')==='en'?'en':'ms';const select=document.querySelector('[data-site-lang]');if(select)select.value=lang;})();
