@@ -499,8 +499,9 @@
 }
 </script>
 <script defer src="/assets/site-track.js"></script>
+<script defer src="/assets/cms-runtime.js"></script>
 </head>
-<body>
+<body data-cms-page="home">
 
 <header class="nav">
   <div class="wrap navrow">
@@ -525,11 +526,11 @@
   <section class="hero">
     <div class="wrap hero-grid">
       <div class="hero-content">
-        <div class="eyebrow">The answer to Malaysia's favourite question</div>
-        <h1 class="display hero-title">Stop<br>wondering.<br><span class="red">Start<br>eating.</span></h1>
-        <p class="hero-sub">Tak tahu nak makan mana? MakanMana helps you decide based on what actually matters right now: mood, budget, distance, craving.</p>
+        <div class="eyebrow" data-cms="hero_eyebrow">The answer to Malaysia's favourite question</div>
+        <h1 class="display hero-title"><span data-cms="hero_title_1">Stop wondering.</span><br><span class="red" data-cms="hero_title_2">Start eating.</span></h1>
+        <p class="hero-sub" data-cms="hero_copy">Tak tahu nak makan mana? MakanMana helps you decide based on what actually matters right now: mood, budget, distance, craving.</p>
         <div class="hero-actions">
-          <a href="https://play.google.com/store/apps/details?id=com.makanmana.apps" class="btn btn-primary">Download untuk Android</a>
+          <a href="https://play.google.com/store/apps/details?id=com.makanmana.apps" class="btn btn-primary" data-cms="primary_cta">Download untuk Android</a>
           <a href="#ios" class="btn btn-outline">iPhone? Join waitlist</a>
         </div>
       </div>
