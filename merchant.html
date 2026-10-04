@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MakanMana for Merchant | Join Early</title>
-<meta name="description" content="Sertai senarai merchant awal MakanMana dan bina kehadiran kedai anda sebelum ciri merchant dilancarkan sepenuhnya.">
+<title>MakanMana for Merchant | Register & Manage Your Store</title>
+<meta name="description" content="Daftar, sahkan pemilikan dan urus kedai serta semua cawangan melalui satu akaun MakanMana Merchant.">
 <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
 <link rel="shortcut icon" type="image/png" href="/favicon-48x48.png">
 <link rel="apple-touch-icon" href="/favicon-makanmana.png">
@@ -215,8 +215,10 @@
   @media(max-width:900px){.footer-grid{grid-template-columns:1fr 1fr;}}
 </style>
 <script defer src="/assets/site-track.js"></script>
+<script defer src="/assets/cms-runtime.js"></script>
+<script defer src="/assets/merchant-bilingual.js"></script>
 </head>
-<body>
+<body data-cms-page="merchant">
 
 <header class="nav">
   <div class="wrap navrow">
@@ -230,7 +232,7 @@
       <a href="#coming">Akan Datang</a>
       <a href="#join">Daftar</a>
     </nav>
-    <a href="/daftar-kedai.html" class="btn btn-primary">Daftar Kedai</a>
+    <div style="display:flex;gap:8px;align-items:center"><select data-site-lang class="btn btn-outline" aria-label="Language"><option value="ms">BM</option><option value="en">EN</option></select><a href="/merchant/login" class="btn btn-outline">Log Masuk</a><a href="/daftar-kedai.html" class="btn btn-primary">Daftar Kedai</a></div>
   </div>
 </header>
 
@@ -239,14 +241,14 @@
   <section class="hero">
     <div class="wrap hero-grid">
       <div>
-        <div class="eyebrow red">For Merchant</div>
-        <h1 class="display hero-title">Tempat sedap<br>patut senang<br><span class="red">dijumpa.</span></h1>
-        <p class="hero-copy">MakanMana dibina untuk membantu orang membuat keputusan makan dengan lebih cepat. Untuk merchant, itu bermaksud peluang lebih besar untuk kedai tempatan ditemui pada saat pelanggan sedang mencari tempat untuk makan.</p>
+        <div class="eyebrow red" data-cms="hero_eyebrow">For Merchant</div>
+        <h1 class="display hero-title"><span data-cms="hero_title_1">Kedai anda.</span><br><span class="red" data-cms="hero_title_2">Lebih mudah diurus.</span></h1>
+        <p class="hero-copy" data-cms="hero_copy">Daftar, sahkan pemilikan dan urus semua cawangan melalui satu akaun MakanMana.</p>
         <div class="hero-actions">
-          <a href="/daftar-kedai.html" class="btn btn-primary">Daftar Kedai</a>
-          <a href="#coming" class="btn btn-outline">Lihat Apa Yang Akan Datang</a>
+          <a href="/daftar-kedai.html" class="btn btn-primary" data-cms="primary_cta">Daftar Kedai</a>
+          <a href="/merchant/login" class="btn btn-outline" data-cms="secondary_cta">Log Masuk Merchant</a>
         </div>
-        <div class="hero-note">Pendaftaran tertakluk kepada semakan · Tiada auto-publish</div>
+        <div class="hero-note">Pendaftaran disemak sebelum kedai dan akses pemilik diaktifkan.</div>
       </div>
 
       <aside class="hero-index" aria-label="Merchant highlights">
@@ -374,39 +376,17 @@
   <section class="block signup" id="join">
     <div class="wrap signup-grid">
       <div>
-        <div class="eyebrow red">Daftar minat</div>
-        <h2 class="display">Masuk senarai<br><span style="color:var(--red)">merchant awal.</span></h2>
-        <p class="signup-copy">Tinggalkan maklumat asas kedai anda. Buat masa ini pendaftaran ini ialah senarai minat awal, bukan pendaftaran akaun merchant penuh.</p>
+        <div class="eyebrow red">Pendaftaran Merchant</div>
+        <h2 class="display">Satu akaun.<br><span style="color:var(--red)">Semua cawangan.</span></h2>
+        <p class="signup-copy">Daftar kedai dengan maklumat sebenar. Selepas diluluskan, MakanMana akan menyediakan akses pemilik dan Merchant Center secara automatik.</p>
       </div>
-
-      <form class="merchant-form" id="merchantForm">
+      <div class="merchant-form">
         <div class="field-grid">
-          <div class="field">
-            <label for="shop">Nama kedai</label>
-            <input id="shop" name="shop" type="text" placeholder="Contoh: Warung Makan Kita" required>
-          </div>
-          <div class="field">
-            <label for="area">Kawasan</label>
-            <input id="area" name="area" type="text" placeholder="Contoh: Shah Alam" required>
-          </div>
-          <div class="field">
-            <label for="name">Nama pemilik / contact person</label>
-            <input id="name" name="name" type="text" placeholder="Nama anda" required>
-          </div>
-          <div class="field">
-            <label for="whatsapp">No. WhatsApp</label>
-            <input id="whatsapp" name="whatsapp" type="tel" placeholder="01X-XXXXXXX" required>
-          </div>
-          <div class="field full">
-            <label for="email">Email (optional)</label>
-            <input id="email" name="email" type="email" placeholder="nama@email.com">
-          </div>
+          <div class="field full"><label>Merchant baharu</label><a class="btn btn-primary" href="/daftar-kedai.html">Daftar Kedai</a></div>
+          <div class="field full"><label>Sudah diluluskan</label><a class="btn btn-outline" href="/merchant/login">Log Masuk Merchant Center</a></div>
         </div>
-        <div class="form-actions">
-          <button class="btn btn-primary" type="submit">Daftar Minat Merchant</button>
-          <span class="form-note">Maklumat anda akan disimpan terus dalam pangkalan data MakanMana untuk tindakan team kami.</span>
-        </div>
-      </form>
+        <p class="form-note">Owner yang sama boleh mengurus beberapa cawangan tanpa mencipta akaun berasingan.</p>
+      </div>
     </div>
   </section>
 
