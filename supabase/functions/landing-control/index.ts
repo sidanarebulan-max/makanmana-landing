@@ -127,6 +127,11 @@ Deno.serve(async(req:Request)=>{
         options:{redirectTo}
       });
       if(linkError||!link?.user?.id||!link?.properties?.action_link)throw linkError||new Error("activation_link_failed");
+      const generatedUrl=new URL(link.properties.action_link);
+      const tokenHash=generatedUrl.searchParams.get("token");
+      const tokenType=generatedUrl.searchParams.get("type")||"magiclink";
+      if(!tokenHash)throw new Error("activation_token_missing");
+      const activationUrl="https://www.makanmana.app/merchant/activate?token_hash="+encodeURIComponent(tokenHash)+"&type="+encodeURIComponent(tokenType);
       const {data:approved,error:approveError}=await db.rpc("landing_approve_merchant_registration",{
         p_registration_id:id,p_auth_user_id:link.user.id,
         p_actor:text(body.actor,160)||String(client.client_key),p_reason:reason
@@ -140,7 +145,7 @@ Deno.serve(async(req:Request)=>{
         restaurant_name:reg.display_name,
         reference_id:reg.reference_code,
         email:reg.contact_email,
-        action_url:link.properties.action_link
+        action_url:activationUrl
       };
       const {error:outboxError}=await db.from("merchant_email_outbox").upsert({
         event_key:eventKey,trigger_event:"merchant.owner.approved",recipient_email:String(reg.contact_email).toLowerCase(),
