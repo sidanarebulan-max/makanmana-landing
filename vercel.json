@@ -1,50 +1,36 @@
 {
   "redirects": [
-    {
-      "source": "/admin",
-      "destination": "/admin.html",
-      "permanent": false
-    }
+    {"source":"/admin","destination":"/admin.html","permanent":false}
   ],
   "headers": [
     {
-      "source": "/admin.html",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-store"
-        },
-        {
-          "key": "X-Robots-Tag",
-          "value": "noindex, nofollow"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "no-referrer"
-        },
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https://omtcatriciyecudlvget.supabase.co data:; connect-src https://omtcatriciyecudlvget.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
-        }
+      "source":"/admin.html",
+      "headers":[
+        {"key":"Cache-Control","value":"no-store"},
+        {"key":"X-Robots-Tag","value":"noindex, nofollow"},
+        {"key":"X-Frame-Options","value":"DENY"},
+        {"key":"Referrer-Policy","value":"no-referrer"},
+        {"key":"X-Content-Type-Options","value":"nosniff"},
+        {"key":"Content-Security-Policy","value":"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https://omtcatriciyecudlvget.supabase.co data:; connect-src https://omtcatriciyecudlvget.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"}
+      ]
+    },
+    {
+      "source":"/merchant-:path(login|activate|center).html",
+      "headers":[
+        {"key":"Cache-Control","value":"no-store"},
+        {"key":"X-Robots-Tag","value":"noindex, nofollow"},
+        {"key":"X-Frame-Options","value":"DENY"},
+        {"key":"Referrer-Policy","value":"strict-origin-when-cross-origin"},
+        {"key":"X-Content-Type-Options","value":"nosniff"},
+        {"key":"Content-Security-Policy","value":"default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src https://omtcatriciyecudlvget.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"}
       ]
     }
   ],
   "rewrites": [
-    {
-      "source": "/privacy",
-      "destination": "/privacy.html"
-    },
-    {
-      "source": "/support",
-      "destination": "/support.html"
-    }
+    {"source":"/privacy","destination":"/privacy.html"},
+    {"source":"/support","destination":"/support.html"},
+    {"source":"/merchant/login","destination":"/merchant-login.html"},
+    {"source":"/merchant/activate","destination":"/merchant-activate.html"},
+    {"source":"/merchant/center","destination":"/merchant-center.html"}
   ]
 }
