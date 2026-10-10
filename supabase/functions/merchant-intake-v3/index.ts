@@ -146,6 +146,46 @@ Deno.serve(async(req:Request)=>{
         return json(origin,200,{ok:true,draftId:data.id,draftToken:raw,expiresAt:data.expires_at});
       }
 
+      if(action==="snapshot"){
+        const draftId=t(body?.draftId,60),draftToken=t(body?.draftToken,200),draft=await getDraft(db,draftId,draftToken);
+        if(!draft)return json(origin,401,{ok:false,error:"draft_invalid_or_expired"});
+        const p=body?.payload||{};
+        if(p.consentAcknowledged!==true)return json(origin,422,{ok:false,error:"consent_required"});
+        const rawMenu=Array.isArray(p.menuItems)?p.menuItems.slice(0,30).map((x:any,i:number)=>({
+          id:t(x?.id,60)||crypto.randomUUID(),
+          section:["makanan","minuman"].includes(t(x?.section,20))?t(x?.section,20):"makanan",
+          category:t(x?.category,80),
+          name:t(x?.name,120),
+          description:t(x?.description,400),
+          price:(x?.price===""||x?.price===null||x?.price===undefined)?null:Number(x.price),
+          currency:"MYR",
+          available:x?.available!==false,
+          imageKey:t(x?.imageKey,600),
+          sortOrder:i
+        })):[];
+        const snapshot={
+          flexibleDraft:true,
+          preferredLanguage:t(p.preferredLanguage,5)==="en"?"en":"ms",
+          ownerName:t(p.ownerName,160),representativeRole:t(p.representativeRole,40)||"owner",contactName:t(p.contactName,160),
+          contactPhone:t(p.contactPhone,40),contactEmail:t(p.contactEmail,250).toLowerCase(),legalName:t(p.legalName,240),
+          registrationNumber:t(p.registrationNumber,100),evidenceType:t(p.evidenceType,50)||"registration_document",
+          officialName:t(p.officialName,240),displayName:t(p.displayName,240),branchName:t(p.branchName,160),
+          addressLine1:t(p.addressLine1,300),addressLine2:t(p.addressLine2,300),state:t(p.state,100),district:t(p.district,100),
+          city:t(p.city,100),locality:t(p.locality,120),postcode:t(p.postcode,10),googleMapsUrl:t(p.googleMapsUrl,1500),
+          latitude:p.latitude===null||p.latitude===""||p.latitude===undefined?null:Number(p.latitude),
+          longitude:p.longitude===null||p.longitude===""||p.longitude===undefined?null:Number(p.longitude),
+          phone:t(p.phone,40),whatsapp:t(p.whatsapp,40),website:t(p.website,500),instagram:t(p.instagram,500),facebook:t(p.facebook,500),tiktok:t(p.tiktok,500),
+          primaryCategory:t(p.primaryCategory,100),cuisineTags:arr(p.cuisineTags),foodTags:arr(p.foodTags),signatureDishes:arr(p.signatureDishes),
+          priceRange:t(p.priceRange,20)||"unknown",serviceModes:arr(p.serviceModes),amenities:arr(p.amenities),
+          shortDescription:t(p.shortDescription,1000),openingHours:p.openingHours&&typeof p.openingHours==="object"?p.openingHours:{},
+          specialHours:t(p.specialHours,500),menuItems:rawMenu,consentAcknowledged:true,marketingOptIn:Boolean(p.marketingOptIn),
+          sourcePage:t(p.sourcePage,500)||"/daftar-kedai.html"
+        };
+        const {error}=await db.from("merchant_intake_drafts").update({payload_snapshot:snapshot,snapshot_saved_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("id",draftId);
+        if(error)throw new Error("snapshot_failed");
+        return json(origin,200,{ok:true,status:"snapshot_saved"});
+      }
+
       if(action==="refresh_consent"){
         const ip=req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()||req.headers.get("cf-connecting-ip")||"unknown";
         const ipHash=await sha(ip),oneHourAgo=new Date(Date.now()-3600000).toISOString();
