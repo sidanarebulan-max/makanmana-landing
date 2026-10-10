@@ -39,7 +39,7 @@ function draftQuality(x:any,files:any[]){
  for(const name of ['website','instagram','facebook','tiktok','googleMapsUrl'])if(text(x[name])){try{const u=new URL(x[name]);if(u.protocol!=='https:'||u.username||u.password)invalid.push(name)}catch{invalid.push(name)}}
  return {missing:[...missing,'Belum selesai dihantar'],invalid_fields:invalid,completion_score:Math.round(((21-missing.length)/21)*100)};
 }
-function consentFields(x:any,legacy=false){const get=(k:string)=>typeof x[k]==='boolean'?x[k]:null;return {processing_consent:get('consent'),privacy_notice_accepted:get('privacyNoticeAccepted'),merchant_terms_accepted:get('termsAccepted'),accuracy_confirmed:get('accuracy'),marketing_opt_in:get('marketingOptIn'),consent_record_status:legacy?'legacy_unavailable':x.consent===true&&x.privacyNoticeAccepted===true&&x.termsAccepted===true&&x.accuracy===true?'complete':x.consentAcknowledged===true?'snapshot_acknowledged':'not_recorded'};}
+function consentFields(x:any,legacy=false){const get=(k:string)=>typeof x[k]==='boolean'?x[k]:null;return {processing_consent:get('consent'),privacy_notice_accepted:get('privacyNoticeAccepted'),merchant_terms_accepted:get('termsAccepted'),accuracy_confirmed:get('accuracy'),marketing_opt_in:get('marketingOptIn'),consent_record_status:x._recovery?.method==='user_supplied_video'?'recovered_video_evidence':legacy?'legacy_unavailable':x.consent===true&&x.privacyNoticeAccepted===true&&x.termsAccepted===true&&x.accuracy===true?'complete':x.consentAcknowledged===true?'snapshot_acknowledged':'not_recorded'};}
 function safeUrl(value:string){try{const u=new URL(value);return ['https:','http:'].includes(u.protocol)?u.href:null;}catch{return null;}}
 Deno.serve(async(req:Request)=>{
  const origin=req.headers.get('origin')||'';const headers={'Content-Type':'application/json','Cache-Control':'no-store','Access-Control-Allow-Origin':origins.has(origin)?origin:'https://www.makanmana.app','Access-Control-Allow-Headers':'authorization,apikey,content-type','Access-Control-Allow-Methods':'POST,OPTIONS','Vary':'Origin'};
@@ -108,7 +108,7 @@ Deno.serve(async(req:Request)=>{
   if(!['registration','partial','draft','waitlist'].includes(p.type)||!/^[-a-f0-9]{36}$/.test(p.id))return response({error:'invalid_entity'},400);
   async function signed(rows:any[],bucket:string){return await Promise.all(rows.map(async r=>{const s=await db.storage.from(bucket).createSignedUrl(r.storage_key,600);return {...r,url:s.error?null:safeUrl(s.data.signedUrl),file_error:!!s.error};}));}
   function partialRow(partial:any){const x=partial.payload||{};return {
-    id:partial.id,reference_code:partial.reference_code,status:partial.status,
+    id:partial.id,reference_code:partial.reference_code,status:partial.status,recovery:x._recovery||null,upload_failures:x.uploadFailures||[],
     owner_name:x.ownerName||'',representative_role:x.representativeRole||null,contact_name:partial.contact_name||x.contactName||'',contact_phone:partial.contact_phone||x.contactPhone||'',contact_email:partial.contact_email||x.contactEmail||'',
     legal_name:x.legalName||'',registration_number:x.registrationNumber||'',official_name:x.officialName||partial.display_name||'',display_name:partial.display_name||x.displayName||x.officialName||'',branch_name:x.branchName||'',
     address_line1:x.addressLine1||'',address_line2:x.addressLine2||'',state:x.state||'',district:x.district||'',city:x.city||'',locality:x.locality||'',postcode:x.postcode||'',google_maps_url:x.googleMapsUrl||'',latitude:x.latitude??null,longitude:x.longitude??null,

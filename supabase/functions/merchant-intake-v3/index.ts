@@ -121,6 +121,7 @@ function snapshotPayload(p:any={}){
     priceRange:t(p.priceRange,20)||"unknown",serviceModes:arr(p.serviceModes),amenities:arr(p.amenities),
     shortDescription:t(p.shortDescription,1000),openingHours:p.openingHours&&typeof p.openingHours==="object"?p.openingHours:{},
     specialHours:t(p.specialHours,500),menuItems:rawMenu,evidenceDeferred:p.evidenceDeferred===true,
+    uploadFailures:Array.isArray(p.uploadFailures)?p.uploadFailures.slice(0,36).map((x:any)=>({role:t(x.role,30),label:t(x.label,160),error:t(x.error,300)})):[],
     consentAcknowledged:p.consentAcknowledged===true,
     consent:consentFlag(p.consent),privacyNoticeAccepted:consentFlag(p.privacyNoticeAccepted),termsAccepted:consentFlag(p.termsAccepted),accuracy:consentFlag(p.accuracy),
     marketingOptIn:typeof p.marketingOptIn==="boolean"?p.marketingOptIn:null,
@@ -187,14 +188,26 @@ Deno.serve(async(req:Request)=>{
       const body=await req.json();
       const action=t(body?.action,40);
       if(action==="create_draft"){
+        if(!body.payload||typeof body.payload!=="object"||Array.isArray(body.payload))return json(origin,426,{ok:false,error:"client_update_required",message:"Borang ini versi lama. Simpan salinan maklumat anda dan muat semula halaman pendaftaran sebelum cuba lagi."});
+        const clientToken=t(body.clientToken,200);
+        if(clientToken&&!/^[a-f0-9]{64}$/.test(clientToken))return json(origin,422,{ok:false,error:"invalid_client_token"});
+        const raw=clientToken||token(),hash=await sha(raw);
+        async function existingDraft(){
+          const {data,error}=await db.from("merchant_intake_drafts").select("*").eq("token_hash",hash).maybeSingle();if(error)throw error;
+          if(!data)return null;
+          const saved=await receipt(db,data);
+          if(!saved&&(data.status!=="draft"||new Date(data.expires_at).getTime()<=Date.now()))return json(origin,401,{ok:false,error:"draft_invalid_or_expired"});
+          return json(origin,200,{ok:true,draftId:data.id,draftToken:raw,expiresAt:data.expires_at,...(saved||{})});
+        }
+        if(clientToken){const prior=await existingDraft();if(prior)return prior;}
         const ip=req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()||req.headers.get("cf-connecting-ip")||"unknown";
         const ipHash=await sha(ip),oneHourAgo=new Date(Date.now()-3600000).toISOString();
         const {count}=await db.from("merchant_intake_attempts").select("id",{count:"exact",head:true}).eq("ip_hash",ipHash).gte("created_at",oneHourAgo);
         if((count||0)>=20)return json(origin,429,{ok:false,error:"too_many_attempts"});
         await db.from("merchant_intake_attempts").insert({ip_hash:ipHash});
-        const raw=token(),hash=await sha(raw);
-        const initial=body.payload&&typeof body.payload==="object"?snapshotPayload(body.payload):null;
-        const {data,error}=await db.from("merchant_intake_drafts").insert({token_hash:hash,ip_hash:ipHash,payload_snapshot:initial,snapshot_saved_at:initial?new Date().toISOString():null}).select("id,expires_at").single();
+        const initial=snapshotPayload(body.payload);
+        const {data,error}=await db.from("merchant_intake_drafts").insert({token_hash:hash,ip_hash:ipHash,payload_snapshot:initial,snapshot_saved_at:new Date().toISOString()}).select("id,expires_at").single();
+        if(error?.code==="23505"&&clientToken){const prior=await existingDraft();if(prior)return prior;}
         if(error||!data)throw new Error("draft_create_failed");
         return json(origin,200,{ok:true,draftId:data.id,draftToken:raw,expiresAt:data.expires_at});
       }
@@ -391,7 +404,7 @@ Deno.serve(async(req:Request)=>{
             googleMapsUrl,latitude:lat,longitude:lng,phone:businessPhone,whatsapp,website,instagram,facebook,tiktok,
             primaryCategory,cuisineTags:arr(p.cuisineTags),foodTags:arr(p.foodTags),signatureDishes:arr(p.signatureDishes),
             priceRange,serviceModes:arr(p.serviceModes),amenities:arr(p.amenities),shortDescription,
-            openingHours:p.openingHours||{},specialHours,
+            openingHours:p.openingHours||{},specialHours,uploadFailures:p.uploadFailures||[],
             consentAcknowledged:p.consentAcknowledged===true,consent:p.consent,
             privacyNoticeAccepted:p.privacyNoticeAccepted,termsAccepted:p.termsAccepted,accuracy:p.accuracy,
             marketingOptIn:p.marketingOptIn,

@@ -216,11 +216,14 @@ if(F.elements.preferredLanguage)F.elements.preferredLanguage.value=localStorage.
 const foodCats=['Nasi & Set Nasi','Nasi Lemak','Nasi Campur','Nasi Kandar','Nasi Kerabu / Dagang','Nasi Ayam','Nasi Arab / Briyani','Nasi Goreng','Mi / Mee','Bihun / Kuey Teow','Laksa','Sup & Berkuah','Tomyam','Lauk-pauk','Ayam','Daging','Kambing','Ikan','Seafood','Sarapan','Roti Canai / Mamak','Roti & Pastri','Burger','Pizza','Pasta','Western','Steak / Grill','BBQ','Steamboat / Hotpot','Jepun / Sushi','Korea','Arab / Shawarma','Vegetarian / Vegan','Set & Kombo','Snek','Kuih Tradisional','Kek & Bakery','Pencuci Mulut','Aiskrim','Lain-lain'];
 const drinkCats=['Kopi','Espresso / Americano','Latte / Cappuccino','Teh','Teh Tarik','Matcha','Coklat','Bubble Tea','Jus Buah','Smoothie','Soda / Fizzy','Minuman Sejuk','Minuman Panas','Air Balang','Minuman Tradisional','Sirap / Cordial','Susu / Yogurt','Air Kelapa','Air Mineral / Botol','Lain-lain'];
 const DRAFT_KEY='mmMerchantDraft',SESSION_KEY='mmMerchantDraftSession';
+let serverSnapshotSaved=false;
+function newDraftToken(){return Array.from(crypto.getRandomValues(new Uint8Array(32)),b=>b.toString(16).padStart(2,'0')).join('')}
+async function timedFetch(url,options,ms=45000){const c=new AbortController(),timer=setTimeout(()=>c.abort(),ms);try{return await fetch(url,{...options,signal:c.signal})}finally{clearTimeout(timer)}}
 function saveLocalDraft(){if(F.style.display==='none')return;try{const fields={};for(const el of F.querySelectorAll('input,select,textarea')){if(el.type==='file')continue;const key=el.name||el.id;if(!key)continue;fields[key]=el.type==='checkbox'?el.checked:el.value}const groups={};for(const n of ['serviceModes','amenities'])groups[n]=checks(n);localStorage.setItem(DRAFT_KEY,JSON.stringify({version:2,fields,groups,hours:hours(),menu:menuItems.map(({image,...it})=>it),step:S}))}catch{}}
 function restoreLocalDraft(){try{const data=JSON.parse(localStorage.getItem(DRAFT_KEY)||'{}'),fields=data.fields||data;for(const el of F.querySelectorAll('input,select,textarea')){if(el.type==='file')continue;const key=el.name||el.id;if(!key||!(key in fields))continue;if(el.type==='checkbox')el.checked=Boolean(fields[key]);else el.value=String(fields[key]??'')}for(const [n,values] of Object.entries(data.groups||{}))for(const el of F.querySelectorAll('[data-g="'+n+'"] input'))el.checked=values.includes(el.value);for(const row of F.querySelectorAll('.hr')){const h=data.hours?.[row.dataset.d];if(!h)continue;row.querySelector('.closed').checked=Boolean(h.closed);row.querySelector('.o').value=h.open||'';row.querySelector('.c').value=h.close||'';row.classList.toggle('off',Boolean(h.closed));row.querySelectorAll('input[type=time]').forEach(el=>el.disabled=Boolean(h.closed))}menuItems=(data.menu||[]).slice(0,30).map(it=>({...it,image:null}));S=Math.min(8,Math.max(0,Number(data.step)||0))}catch{}}
 F.addEventListener('input',()=>queueMicrotask(saveLocalDraft));F.addEventListener('change',()=>queueMicrotask(saveLocalDraft));window.addEventListener('pagehide',saveLocalDraft);
 function draftSession(){try{return JSON.parse(localStorage.getItem(SESSION_KEY)||'null')}catch{return null}}
-function showReceipt(d){if(!d.persisted||!d.submissionId||!/^MM-/.test(d.reference||''))throw new Error('finalize_unconfirmed');window.MMTrack?.send('submit_success',{target:'merchant_registration',status:d.status});F.style.display='none';document.querySelector('.actions').style.display='none';clearProg();O.classList.add('on');const pct=Number(d.completionScore);O.querySelector('p').textContent=d.status==='incomplete'?'Pendaftaran awal anda sudah disimpan ('+pct+'% lengkap). Simpan nombor rujukan ini untuk melengkapkan maklumat kemudian.':'Permohonan lengkap anda sudah diterima untuk semakan.';document.getElementById('ref').textContent=d.reference;localStorage.removeItem(DRAFT_KEY);localStorage.removeItem(SESSION_KEY);O.scrollIntoView({behavior:'smooth'})}
+function showReceipt(d,uploadFailures=[]){if(!d.persisted||!d.submissionId||!/^MM-/.test(d.reference||''))throw new Error('finalize_unconfirmed');window.MMTrack?.send('submit_success',{target:'merchant_registration',status:d.status});F.style.display='none';document.querySelector('.actions').style.display='none';clearProg();O.classList.add('on');const pct=Number(d.completionScore);O.querySelector('p').textContent=d.status==='incomplete'?'Pendaftaran awal anda sudah disimpan ('+pct+'% lengkap). Simpan nombor rujukan ini untuk melengkapkan maklumat kemudian.':'Permohonan lengkap anda sudah diterima untuk semakan.';if(uploadFailures.length)O.querySelector('p').textContent+=' Maklumat kedai sudah disimpan. Gambar/dokumen yang belum berjaya dimuat naik: '+uploadFailures.map(x=>x.label).join(', ')+'. Team MakanMana akan follow up untuk melengkapkannya.';document.getElementById('ref').textContent=d.reference;localStorage.removeItem(DRAFT_KEY);localStorage.removeItem(SESSION_KEY);O.scrollIntoView({behavior:'smooth'})}
 
 
 function show(n){window.MMTrack?.send('step_view',{target:'step_'+(Math.max(0,Math.min(P.length-1,n))+1)});S=Math.max(0,Math.min(P.length-1,n));P.forEach((x,i)=>x.classList.toggle('on',i===S));T.forEach((x,i)=>{x.classList.toggle('on',i===S);x.classList.toggle('done',i<S)});const ms=document.getElementById('mobileStep');if(ms)ms.textContent='Langkah '+(S+1)+' daripada '+P.length+' · '+(T[S]?.textContent||'').replace(/^\d+\s*/, '');PRE.style.visibility=S?'visible':'hidden';NXT.style.display=S===P.length-1?'none':'inline-flex';SEND.style.display=S===P.length-1?'inline-flex':'none';saveLocalDraft();document.getElementById('form').scrollIntoView({behavior:'smooth'})}
@@ -331,7 +334,13 @@ document.getElementById('addFood').onclick=()=>addMenu('makanan');document.getEl
 
 document.querySelectorAll('.closed').forEach(x=>x.onchange=()=>{const r=x.closest('.hr'),off=x.checked;r.classList.toggle('off',off);r.querySelectorAll('input[type=time]').forEach(t=>t.disabled=off)});
 function hours(){const z={};document.querySelectorAll('.hr').forEach(r=>{const closed=r.querySelector('.closed').checked;z[r.dataset.d]={closed,open:r.querySelector('.o').value||'',close:r.querySelector('.c').value||''}});return z}
-async function apiJson(body){const r=await fetch(EP,{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify(body)}),d=await r.json().catch(()=>({}));if(!r.ok||!d.ok){const e=new Error(d.error||'request_failed');e.data=d;throw e}return d}
+async function apiJson(body){
+ for(let attempt=0;attempt<2;attempt++){
+  try{const r=await timedFetch(EP,{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify(body)}),d=await r.json().catch(()=>({}));
+   if(!r.ok||!d.ok){const e=new Error(d.message||d.error||'request_failed');e.data=d;e.retryable=r.status>=500;throw e}return d;
+  }catch(e){if(attempt||body.action==='create_draft'||(e.retryable===false)||(!e.retryable&&!['TypeError','AbortError'].includes(e.name)))throw e;}
+ }
+}
 async function upload(draftId,draftToken,role,f,extra={}){
   let lastError=null;
   for(let attempt=1;attempt<=3;attempt++){
@@ -339,7 +348,7 @@ async function upload(draftId,draftToken,role,f,extra={}){
     b.set('action','upload');b.set('draftId',draftId);b.set('draftToken',draftToken);b.set('role',role);b.set('file',f);
     Object.entries(extra).forEach(([k,v])=>b.set(k,String(v)));
     try{
-      const r=await fetch(EP,{method:'POST',headers:{apikey:KEY},body:b});
+      const r=await timedFetch(EP,{method:'POST',headers:{apikey:KEY},body:b},90000);
       const d=await r.json().catch(()=>({}));
       if(r.ok&&d.ok)return d;
       const code=d.error||'upload_failed';
@@ -366,24 +375,27 @@ F.onsubmit=async e=>{
  try{if(SEND.disabled)return;saveLocalDraft();
  window.MMTrack?.send('upload_start',{target:'merchant_registration'});SEND.disabled=true;PRE.disabled=true;prog('1/4 Membuka sesi & menyimpan maklumat awal...');
  let p=buildPayload(),draft=draftSession();
- if(draft){try{const state=await apiJson({action:'status',draftId:draft.draftId,draftToken:draft.draftToken});if(state.persisted){showReceipt(state);return}}catch(x){if(x.message==='draft_invalid_or_expired'){localStorage.removeItem(SESSION_KEY);draft=null}else throw x}}
- if(!draft){draft=await apiJson({action:'create_draft',payload:p});localStorage.setItem(SESSION_KEY,JSON.stringify(draft))}
+ if(draft?.draftId){try{const state=await apiJson({action:'status',draftId:draft.draftId,draftToken:draft.draftToken});if(state.persisted){showReceipt(state);return}serverSnapshotSaved=state.snapshotSaved===true;}catch(x){if(x.message==='draft_invalid_or_expired'){localStorage.removeItem(SESSION_KEY);draft=null}else throw x}}
+ if(!draft) {draft={draftToken:newDraftToken()};localStorage.setItem(SESSION_KEY,JSON.stringify(draft))}
+ if(!draft.draftId){draft=await apiJson({action:'create_draft',clientToken:draft.draftToken,payload:p});localStorage.setItem(SESSION_KEY,JSON.stringify(draft));if(draft.persisted){showReceipt(draft);return}}
  const id=draft.draftId,token=draft.draftToken;
  await apiJson({action:'snapshot',draftId:id,draftToken:token,payload:p});
- validateFiles();
+ serverSnapshotSaved=true;
+ const uploadFailures=[];
+ async function tryUpload(role,label,f,extra={}){try{const ready=role==='evidence'?await prepareEvidenceFile(f):await prepareImageFile(f);return await upload(id,token,role,ready,extra)}catch(x){uploadFailures.push({role,label,error:x.message||'upload_failed'});return null}}
  prog('2/4 Menyediakan & memuat naik dokumen/gambar private...');
  const evidenceFile=file('evidence');
- if(evidenceFile){const evidenceReady=await prepareEvidenceFile(evidenceFile);await upload(id,token,'evidence',evidenceReady,{evidenceType:val('evidenceType')});}
+ if(evidenceFile)await tryUpload('evidence','Dokumen bukti',evidenceFile,{evidenceType:val('evidenceType')});
  else{F.elements.deferEvidence.checked=true;prog('2/4 Dokumen bukti akan dihantar kemudian. Memuat naik gambar kedai...');}
- for(const n of ['storefront','food','menu','logo','interior'])if(file(n)){prog('2/4 Menyediakan gambar '+n+'...');const ready=await prepareImageFile(file(n));await upload(id,token,n,ready)}
- for(let i=0;i<menuItems.length;i++){const it=menuItems[i];if(it.image){prog('2/4 Menyediakan gambar item menu '+(i+1)+'/'+menuItems.length+'...');const ready=await prepareImageFile(it.image);const u=await upload(id,token,'menu-item',ready,{menuItemId:it.id});it.imageKey=u.key||''}}
+ for(const n of ['storefront','food','menu','logo','interior'])if(file(n)){prog('2/4 Menyediakan gambar '+n+'...');await tryUpload(n,({storefront:'Hadapan kedai',food:'Makanan',menu:'Menu',logo:'Logo',interior:'Ruang kedai'})[n],file(n))}
+ for(let i=0;i<menuItems.length;i++){const it=menuItems[i];if(it.image){prog('2/4 Menyediakan gambar item menu '+(i+1)+'/'+menuItems.length+'...');const u=await tryUpload('menu-item','Gambar '+(it.name||'item menu '+(i+1)),it.image,{menuItemId:it.id});if(u)it.imageKey=u.key||''}}
  prog('3/4 Menyimpan maklumat & status upload...');
- p=buildPayload();
+ p={...buildPayload(),uploadFailures};
  await apiJson({action:'snapshot',draftId:id,draftToken:token,payload:p});
  prog('4/4 Menyimpan pendaftaran...');
- const d=await apiJson({action:'finalize',draftId:id,draftToken:token,payload:p});
- showReceipt(d);
- }catch(x){window.MMTrack?.send('submit_error',{target:'merchant_registration'});const map={too_many_attempts:'Terlalu banyak cubaan. Cuba semula selepas satu jam.',draft_invalid_or_expired:'Sesi pendaftaran tamat. Sila cuba hantar semula.',validation_failed:'Ada format maklumat yang tidak sah. Anda masih boleh kosongkan field itu dan cuba simpan semula.',files_required_or_invalid:'Ada fail yang tidak dapat diproses. Buang fail bermasalah dan cuba simpan semula.',invalid_image:'Format gambar tidak sah.',invalid_evidence:'Format dokumen bukti tidak sah.',file_too_large:'Saiz fail terlalu besar selepas diproses. Cuba screenshot/kecilkan fail dan cuba lagi.',invalid_image_role:'Bahagian gambar tidak dikenali. Refresh halaman dan cuba semula.',upload_failed:'Upload gagal. Cuba semula dengan JPG/PNG atau PDF untuk dokumen SSM.',finalize_unconfirmed:'Server belum mengesahkan rekod pendaftaran. Maklumat anda kekal disimpan; cuba Simpan sekali lagi.',snapshot_required:'Simpan maklumat awal dahulu sebelum upload.',server_error:'Server belum berjaya memproses permohonan.'};err((draftSession()?'Maklumat awal sudah disimpan. Gambar yang gagal boleh dicuba semula.\n':'')+(map[x.message]||x.message)||'Permohonan belum berjaya dihantar.');clearProg()}finally{SEND.disabled=false;PRE.disabled=false}
+ let d;for(let attempt=0;attempt<3;attempt++){try{d=await apiJson({action:'finalize',draftId:id,draftToken:token,payload:p});break}catch(x){const state=await apiJson({action:'status',draftId:id,draftToken:token}).catch(()=>null);if(state?.persisted){d=state;break}if(attempt===2||['draft_invalid_or_expired','origin_not_allowed'].includes(x.message))throw x;prog('4/4 Menyemak & mencuba simpan semula...')}}
+ showReceipt(d,uploadFailures);
+ }catch(x){if(x.message==='draft_invalid_or_expired')localStorage.removeItem(SESSION_KEY);window.MMTrack?.send('submit_error',{target:'merchant_registration'});const map={too_many_attempts:'Terlalu banyak cubaan. Cuba semula selepas satu jam.',draft_invalid_or_expired:'Sesi pendaftaran tamat. Sila cuba hantar semula.',validation_failed:'Ada format maklumat yang tidak sah. Anda masih boleh kosongkan field itu dan cuba simpan semula.',files_required_or_invalid:'Ada fail yang tidak dapat diproses. Buang fail bermasalah dan cuba simpan semula.',invalid_image:'Format gambar tidak sah.',invalid_evidence:'Format dokumen bukti tidak sah.',file_too_large:'Saiz fail terlalu besar selepas diproses. Cuba screenshot/kecilkan fail dan cuba lagi.',invalid_image_role:'Bahagian gambar tidak dikenali. Refresh halaman dan cuba semula.',upload_failed:'Upload gagal. Cuba semula dengan JPG/PNG atau PDF untuk dokumen SSM.',finalize_unconfirmed:'Server belum mengesahkan rekod pendaftaran. Maklumat anda kekal disimpan; cuba Simpan sekali lagi.',snapshot_required:'Simpan maklumat awal dahulu sebelum upload.',client_update_required:'Borang ini versi lama. Maklumat anda kekal di pelayar; muat semula halaman pendaftaran sebelum cuba lagi.',server_error:'Server belum berjaya memproses permohonan.',"The operation was aborted":'Sambungan mengambil terlalu lama. Maklumat kekal disimpan; cuba Simpan sekali lagi.'};err((serverSnapshotSaved?'Maklumat awal sudah disimpan. Gambar yang gagal boleh dicuba semula.\n':'')+(map[x.message]||x.message)||'Permohonan belum berjaya dihantar.');clearProg()}finally{SEND.disabled=false;PRE.disabled=false}
 };
 restoreLocalDraft();renderMenu();show(S);
 </script>
