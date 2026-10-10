@@ -74,7 +74,7 @@ a{color:inherit;text-decoration:none}.w{max-width:1160px;margin:auto;padding:0 2
 <section><div id="err" class="err"></div><div id="progress" class="progress"></div><div id="ok" class="ok"><div style="font-size:42px">✓</div><h2 class="display">Pendaftaran disimpan.</h2><p>Simpan nombor rujukan ini. Kalau maklumat belum lengkap, anda boleh lengkapkan kemudian bila Merchant Center tersedia.</p><div class="ref" id="ref"></div><p><a class="btn outline" href="/merchant.html">Kembali ke For Merchant</a></p></div>
 
 <div class="flex-note"><strong>Daftar dulu, lengkap kemudian.</strong> Tiada maklumat kedai yang wajib untuk bergerak ke langkah seterusnya. Isi apa yang anda tahu sekarang; baki boleh dilengkapkan kemudian.</div><form id="f" novalidate>
-<div class="trap"><input name="company_fax" autocomplete="off"></div>
+
 
 <div class="panel on">
 <div class="ph"><h2 class="display">1. Maklumat pemilik.</h2><p>Nama individu sebenar dan bukti pemilikan / kuasa.</p></div>
@@ -370,7 +370,7 @@ F.onsubmit=async e=>{
  p=buildPayload();
  await apiJson({action:'snapshot',draftId:id,draftToken:token,payload:p});
  prog('4/4 Menyimpan pendaftaran...');
- const d=await apiJson({action:'finalize',draftId:id,draftToken:token,payload:p,company_fax:val('company_fax')});
+ const d=await apiJson({action:'finalize',draftId:id,draftToken:token,payload:p});
  window.MMTrack?.send('submit_success',{target:'merchant_registration',status:d.status||'saved'});F.style.display='none';document.querySelector('.actions').style.display='none';clearProg();O.classList.add('on');const pct=Number.isFinite(Number(d.completionScore))?Number(d.completionScore):null;O.querySelector('p').textContent=d.status==='incomplete'?'Pendaftaran awal anda sudah disimpan'+(pct!==null?' ('+pct+'% lengkap)':'')+'. Tak apa kalau belum lengkap — simpan nombor rujukan ini untuk sambung kemudian.':'Permohonan lengkap anda sudah diterima untuk semakan.';document.getElementById('ref').textContent=d.reference||'Diterima';localStorage.removeItem('mmMerchantDraft');O.scrollIntoView({behavior:'smooth'});
  }catch(x){window.MMTrack?.send('submit_error',{target:'merchant_registration'});const map={too_many_attempts:'Terlalu banyak cubaan. Cuba semula selepas satu jam.',draft_invalid_or_expired:'Sesi pendaftaran tamat. Sila cuba hantar semula.',validation_failed:'Ada format maklumat yang tidak sah. Anda masih boleh kosongkan field itu dan cuba simpan semula.',files_required_or_invalid:'Ada fail yang tidak dapat diproses. Buang fail bermasalah dan cuba simpan semula.',invalid_image:'Format gambar tidak sah.',invalid_evidence:'Format dokumen bukti tidak sah.',file_too_large:'Saiz fail terlalu besar selepas diproses. Cuba screenshot/kecilkan fail dan cuba lagi.',invalid_image_role:'Bahagian gambar tidak dikenali. Refresh halaman dan cuba semula.',upload_failed:'Upload gagal. Cuba semula dengan JPG/PNG atau PDF untuk dokumen SSM.',server_error:'Server belum berjaya memproses permohonan.'};err(map[x.message]||x.message||'Permohonan belum berjaya dihantar.');clearProg()}finally{SEND.disabled=false;PRE.disabled=false}
 };
