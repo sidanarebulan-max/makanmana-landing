@@ -31,6 +31,32 @@ a{color:inherit;text-decoration:none}.w{max-width:1160px;margin:auto;padding:0 2
 .actions{display:flex;justify-content:space-between;gap:12px;margin-top:28px;border-top:1px solid var(--l);padding-top:22px}.err{display:none;background:#fff0ee;border:1px solid #f2c0bb;color:#9c1b15;padding:14px;border-radius:13px;margin-bottom:16px;white-space:pre-line}.err.on{display:block}.progress{display:none;background:#fff;border:1px solid var(--l);border-radius:13px;padding:13px;margin-bottom:16px;font-size:12px;color:var(--g)}.progress.on{display:block}.ok{display:none;background:#fff;border:1px solid var(--l);border-radius:22px;text-align:center;padding:44px 22px}.ok.on{display:block}.ok h2{font-size:60px;margin:10px 0}.ref{display:inline-block;background:var(--soft);color:var(--r);padding:10px 15px;border-radius:999px;font-weight:800}.consent{display:flex;gap:10px;align-items:flex-start;font-size:12px;line-height:1.6;color:var(--g);margin:15px 0}.consent-summary{background:#fff;border:1px solid var(--l);border-radius:15px;padding:16px 18px;margin:16px 0 20px}.consent-summary ul{margin:8px 0 0;padding-left:18px;color:var(--g);font-size:12px;line-height:1.65}.consent-summary a,.consent-item a{color:var(--r);text-decoration:underline}.consent-item{display:flex;gap:11px;align-items:flex-start;background:#fff;border:1px solid var(--l);border-radius:14px;padding:14px 15px;margin:10px 0;font-size:12px;line-height:1.6;color:var(--g)}.consent-item input{margin-top:3px;flex:0 0 auto}.consent-item strong{color:var(--i)}.required-consent{border-left:4px solid var(--r)}.optional-consent{background:#fffaf7;border-style:dashed}.trap{position:absolute;left:-9999px}.foot{border-top:1px solid var(--l);padding:38px 0;font-size:12px;color:var(--g)}
 @media(max-width:900px){.navlinks{display:none}.hg,.shell{grid-template-columns:1fr}.side{position:static}.steps{position:static}.hours{grid-template-columns:1fr}}
 @media(max-width:620px){.w{padding:0 18px}.grid,.mgrid,.uploads{grid-template-columns:1fr}.f.full,.mfield.full{grid-column:auto}.checks{grid-template-columns:1fr 1fr}.hr{grid-template-columns:68px 72px 1fr 1fr}.hero h1{font-size:20vw}.ph h2{font-size:14vw}}
+
+.optional-note{display:inline-flex;align-items:center;gap:6px;background:#f5efe8;color:var(--g);border-radius:999px;padding:5px 9px;font-size:10px;font-weight:800;letter-spacing:.02em;text-transform:none}
+.flex-note{margin:0 0 20px;padding:14px 16px;border-radius:16px;background:#fff4df;border:1px solid #f1d89d;color:#654b15;font-size:13px;line-height:1.55}
+.mobile-step{display:none;font-size:12px;font-weight:800;color:var(--r);padding:10px 0;text-align:center}
+.f input,.f select,.f textarea,.mi input,.mi select{font-size:16px;min-height:48px}
+.f textarea{min-height:110px}
+.native-choice{background:#fff}
+.choice-help{font-size:11px;color:var(--m);line-height:1.5}
+@media(max-width:620px){
+  body{padding-bottom:86px}
+  .w{padding:0 15px}
+  .nav .btn.red{padding:9px 12px;font-size:12px;min-height:40px}
+  .hero{padding:34px 0 24px}.hg{gap:18px}.hero h1{font-size:17vw}.hero p{font-size:14px}
+  .prep{padding:17px;border-radius:18px}.prep li{margin-bottom:4px}
+  .steps{position:sticky;top:72px;z-index:35}.sr{display:none}.mobile-step{display:block}
+  .main{padding:26px 0 20px}.shell{gap:0}.side{display:none}
+  .ph h2{font-size:12vw}.ph p{font-size:13px;margin-bottom:18px}
+  .grid,.mgrid,.uploads{grid-template-columns:1fr;gap:13px}
+  .checks{grid-template-columns:1fr 1fr;gap:8px}
+  .check{min-height:46px;padding:10px}
+  .hr{grid-template-columns:62px 66px 1fr 1fr;gap:6px;padding:10px}
+  .actions{position:fixed;left:0;right:0;bottom:0;z-index:70;background:#fff;border-top:1px solid var(--l);padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:grid;grid-template-columns:auto 1fr;gap:9px;box-shadow:0 -10px 35px #2c21120f}
+  .actions .btn{width:100%;min-height:52px;font-size:14px}.actions #prev{width:52px;padding:0}.actions #send{grid-column:2}
+  .consent-item{padding:14px}.up{padding:16px}
+  .menu-toolbar{align-items:stretch}.menu-toolbar .btn{flex:1}
+}
 </style>
 <script defer src="/assets/site-track.js"></script>
 <script defer src="/assets/cms-runtime.js"></script>
@@ -38,53 +64,53 @@ a{color:inherit;text-decoration:none}.w{max-width:1160px;margin:auto;padding:0 2
 </head>
 <body data-cms-page="registration">
 <header class="nav"><div class="w nr"><a class="brand" href="/merchant.html"><img src="/favicon-makanmana.png" alt="MakanMana">MakanMana</a><nav class="navlinks"><a href="/merchant.html">For Merchant</a><a href="#guide">Panduan</a><a href="/merchant-privacy.html">Privasi</a><a href="/merchant/login">Log Masuk</a></nav><div style="display:flex;gap:8px;align-items:center"><select data-site-lang class="smallbtn" aria-label="Language"><option value="ms">BM</option><option value="en">EN</option></select><a href="#form" class="btn red">Daftar Kedai</a></div></div></header>
-<section class="hero"><div class="w hg"><div><div style="color:var(--r);font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin-bottom:16px">Merchant Registration V4 · PDPA</div><h1 class="display"><span data-cms="page_title">Daftar Kedai</span><br><span>Menu sekali.</span></h1><p data-cms="intro">Daftar kedai anda dengan MakanMana. Maklumat akan disemak sebelum diluluskan.</p></div><aside class="prep" id="guide"><h3>Sediakan sebelum mula</h3><ul><li>Maklumat pemilik / wakil + e-mel aktif</li><li>Alamat premis + Google Maps atau koordinat</li><li>Gambar depan kedai, makanan sebenar & menu berharga</li><li>Dokumen SSM / bil utiliti / surat kuasa</li><li>Senarai menu individu jika mahu — maksimum 30 item</li></ul></aside></div></section>
-<div class="steps"><div class="w sr">
+<section class="hero"><div class="w hg"><div><div style="color:var(--r);font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin-bottom:16px">Merchant Registration V4 · PDPA</div><h1 class="display"><span data-cms="page_title">Daftar Kedai</span><br><span>Menu sekali.</span></h1><p data-cms="intro">Daftar dulu dengan apa yang anda ada. Semua maklumat boleh dilengkapkan kemudian bila Merchant Center dibuka.</p></div><aside class="prep" id="guide"><h3>Tak perlu lengkap semua sekarang</h3><ul><li>Isi mana yang senang dahulu</li><li>Boleh tekan Next walaupun bahagian belum lengkap</li><li>SSM, alamat, gambar dan menu boleh tambah kemudian</li><li>Jika ada telefon atau e-mel, lebih mudah untuk kami follow up</li><li>Setiap submission dapat nombor rujukan</li></ul></aside></div></section>
+<div class="steps"><div class="w"><div class="mobile-step" id="mobileStep">Langkah 1 daripada 9 · Pemilik</div></div><div class="w sr">
 <div class="st on">01 Pemilik</div><div class="st">02 Kedai</div><div class="st">03 Lokasi</div><div class="st">04 Hubungan</div><div class="st">05 Profil</div><div class="st">06 Menu Item</div><div class="st">07 Waktu</div><div class="st">08 Gambar</div><div class="st">09 Hantar</div>
 </div></div>
 
 <main class="main" id="form"><div class="w shell">
 <aside class="side"><h2 class="display">Maklumat sebenar.<br>Semakan manual.</h2><p>Dokumen dan gambar disimpan secara private untuk semakan. Jangan upload MyKad, butiran bank atau dokumen yang tidak berkaitan.</p><div class="guidebox"><a href="#guide">Lihat persediaan borang ↑</a></div></aside>
-<section><div id="err" class="err"></div><div id="progress" class="progress"></div><div id="ok" class="ok"><div style="font-size:42px">✓</div><h2 class="display">Permohonan diterima.</h2><p>Simpan nombor rujukan ini. E-mel pengesahan penerimaan akan dihantar secara automatik. Kelulusan kedai dan akses pemilik akan dimaklumkan melalui e-mel seterusnya.</p><div class="ref" id="ref"></div><p><a class="btn outline" href="/merchant.html">Kembali ke For Merchant</a></p></div>
+<section><div id="err" class="err"></div><div id="progress" class="progress"></div><div id="ok" class="ok"><div style="font-size:42px">✓</div><h2 class="display">Pendaftaran disimpan.</h2><p>Simpan nombor rujukan ini. Kalau maklumat belum lengkap, anda boleh lengkapkan kemudian bila Merchant Center tersedia.</p><div class="ref" id="ref"></div><p><a class="btn outline" href="/merchant.html">Kembali ke For Merchant</a></p></div>
 
-<form id="f" novalidate>
+<div class="flex-note"><strong>Daftar dulu, lengkap kemudian.</strong> Tiada maklumat kedai yang wajib untuk bergerak ke langkah seterusnya. Isi apa yang anda tahu sekarang; baki boleh dilengkapkan kemudian.</div><form id="f" novalidate>
 <div class="trap"><input name="company_fax" autocomplete="off"></div>
 
 <div class="panel on">
 <div class="ph"><h2 class="display">1. Maklumat pemilik.</h2><p>Nama individu sebenar dan bukti pemilikan / kuasa.</p></div>
 <div class="grid">
-<div class="f"><label class="req">Nama penuh pemilik kedai</label><input name="ownerName" required maxlength="160" placeholder="Nama pemilik sebenar"></div>
-<div class="f"><label class="req">Anda mengisi sebagai</label><select name="representativeRole" id="role"><option value="owner">Pemilik kedai</option><option value="authorized_representative">Wakil yang diberi kuasa</option></select></div>
-<div class="f"><label class="req">Nama pengisi borang / wakil</label><input name="contactName" required maxlength="160"></div>
-<div class="f"><label class="req">Telefon untuk dihubungi</label><input name="contactPhone" required type="tel" placeholder="+6012..."></div>
-<div class="f full"><label class="req">E-mel aktif</label><input name="contactEmail" required type="email"><span class="hint">Admin mungkin menghubungi e-mel ini untuk pengesahan.</span></div>
-<div class="f"><label class="req">Bahasa komunikasi</label><select name="preferredLanguage" required><option value="ms">Bahasa Melayu</option><option value="en">English</option></select><span class="hint">E-mel dan Merchant Center akan ikut pilihan ini.</span></div>
+<div class="f"><label >Nama penuh pemilik kedai</label><input name="ownerName" maxlength="160" placeholder="Nama pemilik sebenar"></div>
+<div class="f"><label >Anda mengisi sebagai</label><select name="representativeRole" id="role"><option value="owner">Pemilik kedai</option><option value="authorized_representative">Wakil yang diberi kuasa</option></select></div>
+<div class="f"><label >Nama pengisi borang / wakil</label><input name="contactName" maxlength="160"></div>
+<div class="f"><label >Telefon untuk dihubungi</label><input name="contactPhone" type="tel" placeholder="+6012..."></div>
+<div class="f full"><label >E-mel aktif</label><input name="contactEmail" type="email"><span class="hint">Admin mungkin menghubungi e-mel ini untuk pengesahan.</span></div>
+<div class="f"><label >Bahasa komunikasi</label><select name="preferredLanguage"><option value="ms">Bahasa Melayu</option><option value="en">English</option></select><span class="hint">E-mel dan Merchant Center akan ikut pilihan ini.</span></div>
 <div class="f"><label>Nama berdaftar syarikat</label><input name="legalName" maxlength="240"></div>
-<div class="f"><label id="ssml">Nombor SSM</label><input name="registrationNumber" id="ssm" maxlength="100"></div>
-<div class="f"><label class="req">Jenis bukti</label><select name="evidenceType" id="etype"><option value="registration_document">Dokumen pendaftaran SSM</option><option value="utility_bill">Bil utiliti premis</option><option value="authorization_letter">Surat kuasa pemilik</option></select></div>
-<div class="f full"><label>Dokumen bukti <span style="font-weight:600;color:var(--m)">(boleh hantar kemudian)</span></label><input name="evidence" type="file" accept=".pdf,application/pdf,image/*,.jpg,.jpeg,.png,.webp,.heic,.heif"><span class="hint">PDF atau gambar. PDF maksimum 8MB. Gambar besar/HEIC akan cuba ditukar ke JPG secara automatik. Jika telefon anda gagal attach, teruskan pendaftaran dan hantar dokumen kemudian.</span><span class="file-feedback" data-file-for="evidence">Belum pilih fail.</span><label style="display:flex;gap:10px;align-items:flex-start;margin-top:10px;font-weight:700"><input name="deferEvidence" type="checkbox" style="margin-top:3px;accent-color:var(--r)"> Hantar dokumen kemudian — team MakanMana akan follow up selepas pendaftaran diterima.</label></div>
+<div class="f"><label id="ssml">Nombor SSM <span class="optional-note">Pilihan</span></label><input name="registrationNumber" id="ssm" maxlength="100" placeholder="Boleh isi kemudian"></div>
+<div class="f"><label >Jenis bukti</label><select name="evidenceType" id="etype"><option value="registration_document">Dokumen pendaftaran SSM</option><option value="utility_bill">Bil utiliti premis</option><option value="authorization_letter">Surat kuasa pemilik</option></select></div>
+<div class="f full"><label>Dokumen SSM / bukti <span class="optional-note">Pilihan</span></label><input name="evidence" type="file" accept=".pdf,application/pdf,image/*,.jpg,.jpeg,.png,.webp,.heic,.heif"><span class="hint">PDF atau gambar. PDF maksimum 8MB. Gambar besar/HEIC akan cuba ditukar ke JPG secara automatik. Jika telefon anda gagal attach, teruskan pendaftaran dan hantar dokumen kemudian.</span><span class="file-feedback" data-file-for="evidence">Belum pilih fail.</span><label style="display:flex;gap:10px;align-items:flex-start;margin-top:10px;font-weight:700"><input name="deferEvidence" type="checkbox" style="margin-top:3px;accent-color:var(--r)"> Hantar dokumen kemudian — team MakanMana akan follow up selepas pendaftaran diterima.</label></div>
 </div></div>
 
 <div class="panel">
 <div class="ph"><h2 class="display">2. Identiti kedai.</h2><p>Gunakan nama sebenar pada papan tanda dan penerangan ringkas yang jelas.</p></div>
 <div class="grid">
-<div class="f"><label class="req">Nama rasmi kedai</label><input name="officialName" required></div>
-<div class="f"><label class="req">Nama paparan MakanMana</label><input name="displayName" required></div>
+<div class="f"><label >Nama rasmi kedai</label><input name="officialName"></div>
+<div class="f"><label >Nama paparan MakanMana</label><input name="displayName"></div>
 <div class="f"><label>Nama cawangan</label><input name="branchName"></div>
-<div class="f"><label class="req">Kategori utama</label><input name="primaryCategory" required placeholder="Restoran, Kafe, Gerai..."></div>
-<div class="f full"><label class="req">Penerangan kedai</label><textarea name="shortDescription" required minlength="20" maxlength="1000" placeholder="Contoh: Kafe keluarga yang menjual roti bakar, kopi dan sarapan..."></textarea><span class="hint">Minimum 20 aksara.</span></div>
+<div class="f"><label>Kategori perniagaan <span class="optional-note">Pilihan</span></label><input class="native-choice" name="primaryCategory" list="businessCategoryOptions" placeholder="Pilih / taip kategori kedai"><datalist id="businessCategoryOptions"><option value="Restoran"></option><option value="Kafe"></option><option value="Kedai Kopi"></option><option value="Warung"></option><option value="Gerai Tepi Jalan"></option><option value="Gerai Pasar Malam"></option><option value="Gerai Bazaar"></option><option value="Food Court"></option><option value="Medan Selera"></option><option value="Kiosk"></option><option value="Food Truck"></option><option value="Bakery"></option><option value="Kedai Kek"></option><option value="Dessert Shop"></option><option value="Kedai Aiskrim"></option><option value="Kedai Minuman"></option><option value="Bubble Tea"></option><option value="Kopitiam"></option><option value="Mamak"></option><option value="Nasi Campur"></option><option value="Nasi Kandar"></option><option value="Seafood Restaurant"></option><option value="Steakhouse"></option><option value="Pizzeria"></option><option value="Burger Shop"></option><option value="Ayam Goreng"></option><option value="Hotpot / Steamboat"></option><option value="BBQ / Grill"></option><option value="Sushi Restaurant"></option><option value="Korean Restaurant"></option><option value="Thai Restaurant"></option><option value="Arab / Middle Eastern"></option><option value="Western Restaurant"></option><option value="Vegetarian / Vegan"></option><option value="Home-based Food"></option><option value="Catering"></option><option value="Cloud Kitchen"></option><option value="Frozen Food"></option><option value="Online Food Seller"></option><option value="Lain-lain"></option></datalist><span class="choice-help">Taip beberapa huruf untuk cari pilihan dengan cepat.</span></div>
+<div class="f full"><label >Penerangan kedai</label><textarea name="shortDescription" minlength="20" maxlength="1000" placeholder="Contoh: Kafe keluarga yang menjual roti bakar, kopi dan sarapan..."></textarea><span class="hint">Minimum 20 aksara.</span></div>
 </div></div>
 
 <div class="panel">
-<div class="ph"><h2 class="display">3. Alamat & lokasi.</h2><p>Wajib salah satu: pautan Google Maps yang sah ATAU sepasang koordinat latitude + longitude.</p></div>
+<div class="ph"><h2 class="display">3. Alamat & lokasi.</h2><p>Isi mana yang anda tahu. Google Maps, alamat dan koordinat semuanya boleh dilengkapkan kemudian.</p></div>
 <div class="grid">
-<div class="f full"><label class="req">Alamat baris 1</label><input name="addressLine1" required></div>
+<div class="f full"><label >Alamat baris 1</label><input name="addressLine1"></div>
 <div class="f full"><label>Alamat baris 2</label><input name="addressLine2"></div>
-<div class="f"><label class="req">Negeri</label><input name="state" required></div>
-<div class="f"><label class="req">Daerah</label><input name="district" required></div>
-<div class="f"><label class="req">Bandar</label><input name="city" required></div>
+<div class="f"><label >Negeri</label><input name="state"></div>
+<div class="f"><label >Daerah</label><input name="district"></div>
+<div class="f"><label >Bandar</label><input name="city"></div>
 <div class="f"><label>Kawasan / locality</label><input name="locality"></div>
-<div class="f"><label class="req">Poskod</label><input name="postcode" required pattern="[0-9]{5}" maxlength="5" inputmode="numeric"></div>
+<div class="f"><label >Poskod</label><input name="postcode" pattern="[0-9]{5}" maxlength="5" inputmode="numeric"></div>
 <div class="f full"><label>Pautan Google Maps</label><input name="googleMapsUrl" type="url" placeholder="https://maps.app.goo.gl/..."><span class="hint">Buka Google Maps → Share/Kongsi → Copy link/Salin pautan. Pautan pendek diterima.</span>
 <div class="loc-actions"><button class="smallbtn" type="button" id="extract">Cuba ambil koordinat daripada link</button><span class="locmsg" id="locmsg"></span></div></div>
 <div class="f"><label>Latitude</label><input name="latitude" type="number" step="any" min="-90" max="90" placeholder="3.154321"><span class="hint">Nombor pertama.</span></div>
@@ -96,7 +122,7 @@ a{color:inherit;text-decoration:none}.w{max-width:1160px;margin:auto;padding:0 2
 <div class="panel">
 <div class="ph"><h2 class="display">4. Hubungi kedai.</h2><p>Maklumat hubungan dan URL media sosial jika ada.</p></div>
 <div class="grid">
-<div class="f"><label class="req">Telefon kedai</label><input name="phone" required type="tel"></div>
+<div class="f"><label >Telefon kedai</label><input name="phone" type="tel"></div>
 <div class="f"><label>WhatsApp kedai</label><input name="whatsapp" type="tel"></div>
 <div class="f"><label>Website</label><input name="website" type="url" placeholder="https://"></div>
 <div class="f"><label>Instagram</label><input name="instagram" type="url" placeholder="https://"></div>
@@ -107,9 +133,14 @@ a{color:inherit;text-decoration:none}.w{max-width:1160px;margin:auto;padding:0 2
 <div class="panel">
 <div class="ph"><h2 class="display">5. Menu & kemudahan.</h2><p>Tag, signature dish, servis dan kemudahan premis.</p></div>
 <div class="grid">
-<div class="f"><label>Jenis masakan — pisah koma</label><input name="cuisineTags" placeholder="Melayu, Thai"></div>
-<div class="f"><label>Tag makanan — pisah koma</label><input name="foodTags" placeholder="Nasi, Sup"></div>
-<div class="f full"><label>Menu istimewa — pisah koma</label><input name="signatureDishes" placeholder="Nasi kerabu, Tomyam"></div>
+<div class="f"><label>Jenis masakan utama <span class="optional-note">Pilihan</span></label><input class="native-choice" name="cuisineTags" list="cuisineOptions" placeholder="Contoh: Melayu"><datalist id="cuisineOptions"><option value="Melayu"></option><option value="Mamak"></option><option value="Malaysia"></option><option value="Nyonya / Peranakan"></option><option value="Kelantan"></option><option value="Terengganu"></option><option value="Johor"></option><option value="Negeri Sembilan"></option><option value="Penang"></option><option value="Kedah"></option><option value="Perak"></option><option value="Pahang"></option><option value="Sabah"></option><option value="Sarawak"></option><option value="Cina"></option><option value="Chinese Muslim"></option><option value="India"></option><option value="India Muslim"></option><option value="Thai"></option><option value="Indonesia"></option><option value="Minang / Padang"></option><option value="Jawa"></option><option value="Arab"></option><option value="Yaman"></option><option value="Lubnan"></option><option value="Turki"></option><option value="Mediterranean"></option><option value="Western"></option><option value="Itali"></option><option value="Perancis"></option><option value="Mexico"></option><option value="Jepun"></option><option value="Korea"></option><option value="Vietnam"></option><option value="Filipina"></option><option value="Singapura"></option><option value="Fusion"></option><option value="Vegetarian"></option><option value="Vegan"></option><option value="Seafood"></option><option value="Dessert"></option><option value="Bakery"></option><option value="Cafe"></option><option value="Street Food"></option><option value="Lain-lain"></option></datalist></div>
+<div class="f"><label>Jenis masakan kedua <span class="optional-note">Pilihan</span></label><input class="native-choice" name="cuisineTags2" list="cuisineOptions" placeholder="Contoh: Thai"></div>
+<div class="f"><label>Jenis makanan utama <span class="optional-note">Pilihan</span></label><input class="native-choice" name="foodTags" list="foodTypeOptions" placeholder="Contoh: Nasi Lemak"><datalist id="foodTypeOptions"><option value="Nasi Lemak"></option><option value="Nasi Campur"></option><option value="Nasi Kandar"></option><option value="Nasi Kerabu"></option><option value="Nasi Dagang"></option><option value="Nasi Ayam"></option><option value="Nasi Arab"></option><option value="Nasi Briyani"></option><option value="Nasi Goreng"></option><option value="Ayam Gepuk"></option><option value="Ayam Penyet"></option><option value="Ayam Goreng"></option><option value="Ayam Percik"></option><option value="Rendang"></option><option value="Gulai"></option><option value="Masak Lemak"></option><option value="Asam Pedas"></option><option value="Ikan Bakar"></option><option value="Seafood"></option><option value="Tomyam"></option><option value="Sup"></option><option value="Sup Gearbox"></option><option value="Bakso"></option><option value="Soto"></option><option value="Laksa"></option><option value="Asam Laksa"></option><option value="Laksa Johor"></option><option value="Mee Kari"></option><option value="Mee Rebus"></option><option value="Mee Bandung"></option><option value="Mee Goreng"></option><option value="Mee Mamak"></option><option value="Mee Kolok"></option><option value="Kuey Teow"></option><option value="Char Kuey Teow"></option><option value="Bihun"></option><option value="Lontong"></option><option value="Roti Canai"></option><option value="Roti Bakar"></option><option value="Tosai"></option><option value="Chapati"></option><option value="Naan"></option><option value="Murtabak"></option><option value="Satay"></option><option value="Burger"></option><option value="Ramly Burger"></option><option value="Pizza"></option><option value="Pasta"></option><option value="Chicken Chop"></option><option value="Lamb Chop"></option><option value="Steak"></option><option value="Fish & Chips"></option><option value="Grill"></option><option value="BBQ"></option><option value="Steamboat"></option><option value="Hotpot"></option><option value="Dim Sum"></option><option value="Sushi"></option><option value="Ramen"></option><option value="Udon"></option><option value="Donburi"></option><option value="Korean BBQ"></option><option value="Tteokbokki"></option><option value="Fried Chicken"></option><option value="Shawarma"></option><option value="Kebab"></option><option value="Falafel"></option><option value="Poke Bowl"></option><option value="Salad"></option><option value="Sandwich"></option><option value="Wrap"></option><option value="Pastry"></option><option value="Croissant"></option><option value="Donut"></option><option value="Kuih Melayu"></option><option value="Karipap"></option><option value="Pau"></option><option value="Kek"></option><option value="Cheesecake"></option><option value="Dessert"></option><option value="Ais Krim"></option><option value="Cendol"></option><option value="ABC / Ais Kacang"></option><option value="Waffle"></option><option value="Pancake"></option><option value="Kopi"></option><option value="Teh"></option><option value="Teh Tarik"></option><option value="Matcha"></option><option value="Bubble Tea"></option><option value="Jus Buah"></option><option value="Smoothie"></option><option value="Air Balang"></option><option value="Minuman Tradisional"></option><option value="Lain-lain"></option></datalist></div>
+<div class="f"><label>Jenis makanan kedua <span class="optional-note">Pilihan</span></label><input class="native-choice" name="foodTags2" list="foodTypeOptions" placeholder="Contoh: Ayam Gepuk"></div>
+<div class="f"><label>Jenis makanan ketiga <span class="optional-note">Pilihan</span></label><input class="native-choice" name="foodTags3" list="foodTypeOptions" placeholder="Contoh: Kopi"></div>
+<div class="f"><label>Menu signature 1 <span class="optional-note">Pilihan</span></label><input class="native-choice" name="signatureDishes" list="signatureOptions" placeholder="Pilih / taip menu"><datalist id="signatureOptions"><option value="Nasi Lemak"></option><option value="Nasi Kerabu"></option><option value="Nasi Dagang"></option><option value="Nasi Kandar"></option><option value="Nasi Ayam"></option><option value="Ayam Gepuk"></option><option value="Ayam Penyet"></option><option value="Ayam Percik"></option><option value="Rendang Tok"></option><option value="Asam Pedas"></option><option value="Siakap 3 Rasa"></option><option value="Patin Tempoyak"></option><option value="Satay"></option><option value="Laksa Penang"></option><option value="Mee Kolok"></option><option value="Char Kuey Teow"></option><option value="Roti Canai"></option><option value="Murtabak"></option><option value="Burger Special"></option><option value="Margherita Pizza"></option><option value="Beef Pepperoni Pizza"></option><option value="Chicken Chop"></option><option value="Fish & Chips"></option><option value="Shawarma"></option><option value="Sushi"></option><option value="Ramen"></option><option value="Tteokbokki"></option><option value="Kuih Melayu"></option><option value="Cendol"></option><option value="Kek"></option><option value="Kopi"></option></datalist></div>
+<div class="f"><label>Menu signature 2 <span class="optional-note">Pilihan</span></label><input class="native-choice" name="signatureDishes2" list="signatureOptions" placeholder="Boleh tambah kemudian"></div>
+<div class="f full"><span class="choice-help">Tak jumpa pilihan? Taip sendiri. Anda boleh tambah lebih banyak kategori dan menu kemudian dalam Merchant Center.</span></div>
 <div class="f"><label>Julat harga</label><select name="priceRange"><option value="unknown">Tidak pasti</option><option value="budget">Bajet</option><option value="moderate">Sederhana</option><option value="premium">Premium</option></select></div>
 </div>
 <div class="lbl" style="margin-top:20px">Perkhidmatan</div><div class="checks" data-g="serviceModes">
@@ -120,9 +151,9 @@ a{color:inherit;text-decoration:none}.w{max-width:1160px;margin:auto;padding:0 2
 </div></div>
 
 <div class="panel" id="menuPanel">
-<div class="ph"><h2 class="display">6. Senarai menu.</h2><p>Item individu adalah pilihan. Tambah sehingga 30 makanan/minuman; gambar helaian menu dengan harga masih wajib di Bahagian 8.</p></div>
+<div class="ph"><h2 class="display">6. Senarai menu.</h2><p>Item individu adalah pilihan. Tambah sekarang jika sempat, atau lengkapkan menu kemudian dalam Merchant Center.</p></div>
 <div class="menu-toolbar"><button class="btn red" type="button" id="addFood">+ Tambah makanan</button><button class="btn outline" type="button" id="addDrink">+ Tambah minuman</button><strong id="menuCount">0/30 item</strong></div>
-<div class="notice" id="emptyMenu">Belum ada item menu. Anda masih boleh mendaftar menggunakan gambar helaian menu berharga yang diwajibkan di Bahagian 8.</div>
+<div class="notice" id="emptyMenu">Belum ada item menu. Tak apa — anda boleh teruskan dan tambah menu kemudian.</div>
 <div id="menuWrap"></div>
 </div>
 
@@ -141,34 +172,31 @@ a{color:inherit;text-decoration:none}.w{max-width:1160px;margin:auto;padding:0 2
 </div>
 
 <div class="panel">
-<div class="ph"><h2 class="display">8. Gambar kedai.</h2><p>Foto asal kedai sahaja. Dokumen SSM jangan diletakkan di sini.</p></div>
+<div class="ph"><h2 class="display">8. Gambar kedai.</h2><p>Semua gambar pilihan buat masa ini. Upload yang ada; selebihnya boleh tambah kemudian.</p></div>
 <div class="uploads">
-<div class="up"><strong>Hadapan kedai *</strong><p>Papan tanda + pintu masuk. Gambar maksimum 20MB sebelum auto-compress.</p><input name="storefront" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif" required><span class="file-feedback" data-file-for="storefront">Belum pilih gambar.</span></div>
-<div class="up"><strong>Makanan sebenar *</strong><p>Makanan yang benar-benar dijual. Gambar maksimum 20MB sebelum auto-compress.</p><input name="food" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif" required><span class="file-feedback" data-file-for="food">Belum pilih gambar.</span></div>
-<div class="up"><strong>Menu dengan harga *</strong><p>Nama menu dan harga mesti jelas. Gambar maksimum 20MB sebelum auto-compress.</p><input name="menu" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif" required><span class="file-feedback" data-file-for="menu">Belum pilih gambar.</span></div>
+<div class="up"><strong>Hadapan kedai <span class="optional-note">Pilihan</span></strong><p>Papan tanda + pintu masuk. Gambar maksimum 20MB sebelum auto-compress.</p><input name="storefront" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif"><span class="file-feedback" data-file-for="storefront">Belum pilih gambar.</span></div>
+<div class="up"><strong>Makanan sebenar <span class="optional-note">Pilihan</span></strong><p>Makanan yang benar-benar dijual. Gambar maksimum 20MB sebelum auto-compress.</p><input name="food" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif"><span class="file-feedback" data-file-for="food">Belum pilih gambar.</span></div>
+<div class="up"><strong>Menu dengan harga <span class="optional-note">Pilihan</span></strong><p>Nama menu dan harga mesti jelas. Gambar maksimum 20MB sebelum auto-compress.</p><input name="menu" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif"><span class="file-feedback" data-file-for="menu">Belum pilih gambar.</span></div>
 <div class="up"><strong>Logo kedai</strong><p>Pilihan. Gambar maksimum 20MB sebelum auto-compress.</p><input name="logo" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif"><span class="file-feedback" data-file-for="logo">Belum pilih gambar.</span></div>
 <div class="up"><strong>Ruang dalaman</strong><p>Pilihan. Gambar maksimum 20MB sebelum auto-compress.</p><input name="interior" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif"><span class="file-feedback" data-file-for="interior">Belum pilih gambar.</span></div>
 </div></div>
 
 <div class="panel consent-panel">
-<div class="ph"><h2 class="display">9. Persetujuan akhir & hantar.</h2><p>Sebelum hantar, tandakan <strong>semua kotak WAJIB</strong> di bawah. Setiap persetujuan diasingkan supaya jelas apa yang anda setujui. Kotak promosi adalah pilihan dan tidak menjejaskan permohonan.</p></div>
+<div class="ph"><h2 class="display">9. Simpan pendaftaran.</h2><p>Tak perlu tunggu semua maklumat lengkap. Simpan apa yang ada sekarang dan gunakan nombor rujukan untuk sambung kemudian.</p></div>
 <div class="consent-summary">
-<strong>Ringkasan sebelum submit</strong>
+<strong>Apa berlaku selepas anda simpan?</strong>
 <ul>
-<li>Permohonan akan masuk queue semakan admin dan tidak diterbitkan secara automatik.</li>
-<li>Dokumen bukti dan media semakan disimpan secara private untuk tujuan semakan.</li>
-<li>Anda boleh meminta akses, pembetulan, pemadaman, penarikan consent atau opt-out marketing melalui <a href="/privacy-request.html" target="_blank" rel="noopener">Pusat Permintaan Privasi</a>.</li>
+<li>Maklumat yang lengkap akan masuk semakan admin.</li>
+<li>Maklumat yang belum lengkap akan disimpan sebagai <strong>partial registration</strong>, bukan ditolak.</li>
+<li>SSM, gambar, menu, alamat dan maklumat lain boleh dilengkapkan kemudian.</li>
+<li>Dengan menekan <strong>Simpan pendaftaran</strong>, anda mengesahkan anda berhak menghantar maklumat ini dan bersetuju dengan <a href="/merchant-privacy.html" target="_blank" rel="noopener">Notis Privasi Merchant</a> serta <a href="/terms.html" target="_blank" rel="noopener">Terma Merchant</a>.</li>
 </ul>
 </div>
-<label class="consent-item required-consent"><input type="checkbox" name="accuracy" required> <span><strong>WAJIB — Pengesahan ketepatan & kuasa.</strong> Saya mengesahkan maklumat, senarai menu, harga dan gambar adalah tepat, dan saya pemilik atau wakil yang benar-benar diberi kuasa oleh pemilik kedai.</span></label>
-<label class="consent-item required-consent"><input type="checkbox" name="consent" required> <span><strong>WAJIB — Consent pemprosesan.</strong> Saya membenarkan MakanMana memproses maklumat perniagaan, maklumat hubungan, lokasi dan bukti yang saya hantar untuk pengesahan serta semakan permohonan merchant. Consent ini <u>tidak termasuk marketing</u>.</span></label>
-<label class="consent-item required-consent"><input type="checkbox" name="privacyNoticeAccepted" required> <span><strong>WAJIB — Notis Privasi.</strong> Saya telah membaca dan memahami <a href="/merchant-privacy.html" target="_blank" rel="noopener">Notis Privasi / Privacy Notice</a>, termasuk tujuan pemprosesan, hak saya, retensi dan pemprosesan melalui penyedia teknologi di luar Malaysia.</span></label>
-<label class="consent-item required-consent"><input type="checkbox" name="termsAccepted" required> <span><strong>WAJIB — Terma pendaftaran.</strong> Saya telah membaca dan bersetuju dengan <a href="/terms.html" target="_blank" rel="noopener">Terma Pendaftaran Merchant</a>, termasuk bahawa penghantaran borang tidak menjamin kelulusan atau penerbitan.</span></label>
-<label class="consent-item optional-consent"><input type="checkbox" name="marketingOptIn"> <span><strong>PILIHAN — Kemas kini & promosi.</strong> Saya mahu menerima berita, jemputan atau promosi MakanMana berkaitan merchant. Saya boleh tarik balik pilihan ini pada bila-bila masa. <em>Tidak wajib untuk mendaftar.</em></span></label>
-<p class="hint">Versi consent: merchant-intake-consent-v3-pdpa · Notis Privasi: privacy-2026-09-30 · Terms: merchant-terms-2026-09-30</p>
+<label class="consent-item optional-consent"><input type="checkbox" name="marketingOptIn"> <span><strong>Pilihan — kemas kini & promosi.</strong> Saya mahu menerima berita atau promosi MakanMana berkaitan merchant.</span></label>
+<p class="hint">Consent direkod apabila anda menekan butang Simpan pendaftaran. Marketing kekal pilihan.</p>
 </div>
 
-<div class="actions"><button type="button" id="prev" class="btn outline" style="visibility:hidden">← Sebelum</button><button type="button" id="next" class="btn red">Seterusnya →</button><button type="submit" id="send" class="btn red" style="display:none" data-cms="submit_cta">Daftar kedai & hantar untuk semakan</button></div>
+<div class="actions"><button type="button" id="prev" class="btn outline" style="visibility:hidden">←</button><button type="button" id="next" class="btn red">Seterusnya →</button><button type="submit" id="send" class="btn red" style="display:none" data-cms="submit_cta">Simpan pendaftaran</button></div>
 </form>
 </section></div></main>
 <footer class="foot"><div class="w">© 2026 MakanMana · <a href="/privacy">Privacy</a> · <a href="/support">Support</a> · <a href="/terms.html">Terms</a></div></footer>
@@ -181,8 +209,13 @@ let S=0,menuItems=[];
 if(F.elements.preferredLanguage)F.elements.preferredLanguage.value=localStorage.getItem('mmSiteLang')==='en'?'en':'ms';
 const foodCats=['Nasi','Mi & Bihun','Lauk-pauk','Sup & Berkuah','Sarapan','Roti & Pastri','Western','Set & Kombo','Snek','Pencuci Mulut','Lain-lain'];
 const drinkCats=['Kopi','Teh','Jus & Buah','Minuman Sejuk','Minuman Panas','Smoothie','Minuman Tradisional','Air Botol','Lain-lain'];
+const DRAFT_KEY='mmMerchantDraft';
+function saveLocalDraft(){try{const data={};for(const el of F.querySelectorAll('input[name],select[name],textarea[name]')){if(el.type==='file'||el.name==='company_fax')continue;if(el.type==='checkbox')data[el.name||('cb_'+el.value)]=el.checked;else data[el.name]=el.value}localStorage.setItem(DRAFT_KEY,JSON.stringify(data))}catch{}}
+function restoreLocalDraft(){try{const data=JSON.parse(localStorage.getItem(DRAFT_KEY)||'{}');for(const el of F.querySelectorAll('input[name],select[name],textarea[name]')){if(el.type==='file'||el.name==='company_fax')continue;if(!(el.name in data))continue;if(el.type==='checkbox')el.checked=Boolean(data[el.name]);else el.value=String(data[el.name]??'')}}catch{}}
+restoreLocalDraft();F.addEventListener('input',saveLocalDraft);F.addEventListener('change',saveLocalDraft);
 
-function show(n){window.MMTrack?.send('step_view',{target:'step_'+(Math.max(0,Math.min(P.length-1,n))+1)});S=Math.max(0,Math.min(P.length-1,n));P.forEach((x,i)=>x.classList.toggle('on',i===S));T.forEach((x,i)=>{x.classList.toggle('on',i===S);x.classList.toggle('done',i<S)});PRE.style.visibility=S?'visible':'hidden';NXT.style.display=S===P.length-1?'none':'inline-flex';SEND.style.display=S===P.length-1?'inline-flex':'none';document.getElementById('form').scrollIntoView({behavior:'smooth'})}
+
+function show(n){window.MMTrack?.send('step_view',{target:'step_'+(Math.max(0,Math.min(P.length-1,n))+1)});S=Math.max(0,Math.min(P.length-1,n));P.forEach((x,i)=>x.classList.toggle('on',i===S));T.forEach((x,i)=>{x.classList.toggle('on',i===S);x.classList.toggle('done',i<S)});const ms=document.getElementById('mobileStep');if(ms)ms.textContent='Langkah '+(S+1)+' daripada '+P.length+' · '+(T[S]?.textContent||'').replace(/^\d+\s*/, '');PRE.style.visibility=S?'visible':'hidden';NXT.style.display=S===P.length-1?'none':'inline-flex';SEND.style.display=S===P.length-1?'inline-flex':'none';document.getElementById('form').scrollIntoView({behavior:'smooth'})}
 function err(m){E.textContent=m;E.classList.add('on');E.scrollIntoView({behavior:'smooth'})}
 function clearErr(){E.classList.remove('on');E.textContent=''}
 function prog(m){PR.textContent=m;PR.classList.add('on');PR.scrollIntoView({behavior:'smooth',block:'nearest'})}
@@ -231,13 +264,11 @@ async function prepareEvidenceFile(f){
 }
 function csv(s){return [...new Set(String(s||'').split(',').map(x=>x.trim()).filter(Boolean))].slice(0,20)}
 function checks(n){return [...document.querySelectorAll('[data-g="'+n+'"] input:checked')].map(x=>x.value)}
-function validPage(){clearErr();for(const x of P[S].querySelectorAll('input,select,textarea')){if(x.offsetParent!==null&&!x.checkValidity()){const label=x.closest('.f')?.querySelector('label')?.textContent?.trim()||x.name||'medan wajib';err('Lengkapkan bahagian ini dahulu: '+label+'.');x.focus({preventScroll:true});x.reportValidity();return false}}
- if(S===2){const map=val('googleMapsUrl'),lat=val('latitude'),lng=val('longitude');if(!map&&!(lat&&lng)){err('Wajib beri pautan Google Maps ATAU sepasang koordinat latitude dan longitude.');return false}if((lat&&!lng)||(!lat&&lng)){err('Isi kedua-dua latitude dan longitude, atau kosongkan kedua-duanya.');return false}}
- return true}
-PRE.onclick=()=>show(S-1);NXT.onclick=()=>{if(validPage())show(S+1)};T.forEach((x,i)=>x.onclick=()=>{if(i<=S||validPage())show(i)});
+function validPage(){clearErr();return true}
+PRE.onclick=()=>show(S-1);NXT.onclick=()=>show(S+1);T.forEach((x,i)=>x.onclick=()=>show(i));
 
 const R=document.getElementById('role'),ET=document.getElementById('etype'),SSM=document.getElementById('ssm'),SSML=document.getElementById('ssml');
-function proof(){if(R.value==='authorized_representative'){ET.value='authorization_letter';[...ET.options].forEach(o=>o.disabled=o.value!=='authorization_letter')}else{[...ET.options].forEach(o=>o.disabled=false);if(ET.value==='authorization_letter')ET.value='registration_document'}SSM.required=ET.value==='registration_document';SSML.classList.toggle('req',SSM.required)}
+function proof(){if(R.value==='authorized_representative'){ET.value='authorization_letter'}SSM.required=false;SSML.classList.remove('req')}
 R.onchange=proof;ET.onchange=proof;proof();
 F.elements.deferEvidence?.addEventListener('change',e=>{if(e.target.checked){F.elements.evidence.value='';setFileFeedback('evidence',null,true,'Dokumen akan dihantar kemudian. Pendaftaran boleh diteruskan.');clearErr();}});
 ['evidence','storefront','food','menu','logo','interior'].forEach(name=>{
@@ -317,11 +348,11 @@ async function upload(draftId,draftToken,role,f,extra={}){
   }
   throw lastError||new Error('upload_failed');
 }
-function validateFiles(){const ev=file('evidence');if(ev&&isPdf(ev)&&ev.size>8*1024*1024)throw new Error('PDF SSM/bukti melebihi 8MB.');if(ev&&!isPdf(ev)&&ev.size>20*1024*1024)throw new Error('Gambar SSM/bukti melebihi 20MB.');for(const n of ['storefront','food','menu'])if(!file(n))throw new Error('Gambar hadapan kedai, makanan sebenar dan menu berharga adalah wajib.');for(const n of ['storefront','food','menu','logo','interior'])if(file(n)&&file(n).size>20*1024*1024)throw new Error('Ada gambar kedai melebihi 20MB.');for(const it of menuItems)if(it.image&&it.image.size>20*1024*1024)throw new Error('Ada gambar item menu melebihi 20MB.')}
+function validateFiles(){const ev=file('evidence');if(ev&&isPdf(ev)&&ev.size>8*1024*1024)throw new Error('PDF SSM/bukti melebihi 8MB.');if(ev&&!isPdf(ev)&&ev.size>20*1024*1024)throw new Error('Gambar SSM/bukti melebihi 20MB.');for(const n of ['storefront','food','menu','logo','interior'])if(file(n)&&file(n).size>20*1024*1024)throw new Error('Ada gambar kedai melebihi 20MB.');for(const it of menuItems)if(it.image&&it.image.size>20*1024*1024)throw new Error('Ada gambar item menu melebihi 20MB.')}
 F.onsubmit=async e=>{
- e.preventDefault();clearErr();clearProg();if(!validPage())return;
- try{validateFiles();for(const it of menuItems){if(!it.category.trim()||!it.name.trim()||it.price===''||!Number.isFinite(Number(it.price))||Number(it.price)<0||Number(it.price)>100000||Math.abs(Number(it.price)*100-Math.round(Number(it.price)*100))>1e-6)throw new Error('Lengkapkan setiap item menu: jenis, kategori, nama dan harga RM yang sah.')}
- const map=val('googleMapsUrl'),lat=val('latitude'),lng=val('longitude');if(!map&&!(lat&&lng))throw new Error('Wajib beri Google Maps ATAU koordinat lengkap.');if((lat&&!lng)||(!lat&&lng))throw new Error('Isi kedua-dua latitude dan longitude.');
+ e.preventDefault();clearErr();clearProg();
+ try{validateFiles();
+ const map=val('googleMapsUrl'),lat=val('latitude'),lng=val('longitude');
  window.MMTrack?.send('upload_start',{target:'merchant_registration'});SEND.disabled=true;PRE.disabled=true;prog('1/4 Membuka sesi pendaftaran...');
  const draft=await apiJson({action:'create_draft'});const id=draft.draftId,token=draft.draftToken;
  prog('2/4 Menyediakan & memuat naik dokumen/gambar private...');
@@ -330,12 +361,12 @@ F.onsubmit=async e=>{
  else{F.elements.deferEvidence.checked=true;prog('2/4 Dokumen bukti akan dihantar kemudian. Memuat naik gambar kedai...');}
  for(const n of ['storefront','food','menu','logo','interior'])if(file(n)){prog('2/4 Menyediakan gambar '+n+'...');const ready=await prepareImageFile(file(n));await upload(id,token,n,ready)}
  for(let i=0;i<menuItems.length;i++){const it=menuItems[i];if(it.image){prog('2/4 Menyediakan gambar item menu '+(i+1)+'/'+menuItems.length+'...');const ready=await prepareImageFile(it.image);const u=await upload(id,token,'menu-item',ready,{menuItemId:it.id});it.imageKey=u.key||''}}
- prog('3/4 Mengesahkan data merchant...');
- const p={preferredLanguage:val('preferredLanguage')||localStorage.getItem('mmSiteLang')||'ms',ownerName:val('ownerName'),representativeRole:val('representativeRole'),contactName:val('contactName'),contactPhone:val('contactPhone'),contactEmail:val('contactEmail'),legalName:val('legalName'),registrationNumber:val('registrationNumber'),evidenceType:val('evidenceType'),evidenceDeferred:!file('evidence'),officialName:val('officialName'),displayName:val('displayName'),branchName:val('branchName'),addressLine1:val('addressLine1'),addressLine2:val('addressLine2'),state:val('state'),district:val('district'),city:val('city'),locality:val('locality'),postcode:val('postcode'),googleMapsUrl:map,latitude:lat?Number(lat):null,longitude:lng?Number(lng):null,phone:val('phone'),whatsapp:val('whatsapp'),website:val('website'),instagram:val('instagram'),facebook:val('facebook'),tiktok:val('tiktok'),primaryCategory:val('primaryCategory'),cuisineTags:csv(val('cuisineTags')),foodTags:csv(val('foodTags')),signatureDishes:csv(val('signatureDishes')),priceRange:val('priceRange'),serviceModes:checks('serviceModes'),amenities:checks('amenities'),shortDescription:val('shortDescription'),openingHours:hours(),specialHours:val('specialHours'),menuItems:menuItems.map((it,i)=>({id:it.id,section:it.section,category:it.category.trim(),name:it.name.trim(),description:it.description.trim(),price:Number(it.price),currency:'MYR',available:it.available,imageKey:it.imageKey||'',sortOrder:i})),consent:F.elements.consent.checked,privacyNoticeAccepted:F.elements.privacyNoticeAccepted.checked,termsAccepted:F.elements.termsAccepted.checked,marketingOptIn:F.elements.marketingOptIn.checked,accuracy:F.elements.accuracy.checked,consentVersion:'merchant-intake-consent-v3-pdpa',privacyNoticeVersion:'privacy-2026-09-30',termsVersion:'merchant-terms-2026-09-30',consentRecordedAt:new Date().toISOString(),sourcePage:location.pathname};
- prog('4/4 Menghantar ke queue semakan admin...');
+ prog('3/4 Menyimpan maklumat yang anda dah isi...');
+ const p={preferredLanguage:val('preferredLanguage')||localStorage.getItem('mmSiteLang')||'ms',ownerName:val('ownerName'),representativeRole:val('representativeRole'),contactName:val('contactName'),contactPhone:val('contactPhone'),contactEmail:val('contactEmail'),legalName:val('legalName'),registrationNumber:val('registrationNumber'),evidenceType:val('evidenceType'),evidenceDeferred:!file('evidence'),officialName:val('officialName'),displayName:val('displayName'),branchName:val('branchName'),addressLine1:val('addressLine1'),addressLine2:val('addressLine2'),state:val('state'),district:val('district'),city:val('city'),locality:val('locality'),postcode:val('postcode'),googleMapsUrl:map,latitude:lat?Number(lat):null,longitude:lng?Number(lng):null,phone:val('phone'),whatsapp:val('whatsapp'),website:val('website'),instagram:val('instagram'),facebook:val('facebook'),tiktok:val('tiktok'),primaryCategory:val('primaryCategory'),cuisineTags:[val('cuisineTags'),val('cuisineTags2')].filter(Boolean),foodTags:[val('foodTags'),val('foodTags2'),val('foodTags3')].filter(Boolean),signatureDishes:[val('signatureDishes'),val('signatureDishes2')].filter(Boolean),priceRange:val('priceRange'),serviceModes:checks('serviceModes'),amenities:checks('amenities'),shortDescription:val('shortDescription'),openingHours:hours(),specialHours:val('specialHours'),menuItems:menuItems.map((it,i)=>({id:it.id,section:it.section,category:it.category.trim(),name:it.name.trim(),description:it.description.trim(),price:it.price===''?null:Number(it.price),currency:'MYR',available:it.available,imageKey:it.imageKey||'',sortOrder:i})),flexibleDraft:true,consentAcknowledged:true,consent:true,privacyNoticeAccepted:true,termsAccepted:true,marketingOptIn:Boolean(F.elements.marketingOptIn?.checked),accuracy:true,consentVersion:'merchant-intake-consent-v3-pdpa',privacyNoticeVersion:'privacy-2026-09-30',termsVersion:'merchant-terms-2026-09-30',consentRecordedAt:new Date().toISOString(),sourcePage:location.pathname};
+ prog('4/4 Menyimpan pendaftaran...');
  const d=await apiJson({action:'finalize',draftId:id,draftToken:token,payload:p,company_fax:val('company_fax')});
- window.MMTrack?.send('submit_success',{target:'merchant_registration'});F.style.display='none';document.querySelector('.actions').style.display='none';clearProg();O.classList.add('on');document.getElementById('ref').textContent=d.reference||'Diterima';O.scrollIntoView({behavior:'smooth'});
- }catch(x){window.MMTrack?.send('submit_error',{target:'merchant_registration'});const map={too_many_attempts:'Terlalu banyak cubaan. Cuba semula selepas satu jam.',draft_invalid_or_expired:'Sesi pendaftaran tamat. Sila cuba hantar semula.',validation_failed:'Ada maklumat yang belum lengkap atau tidak sah.',files_required_or_invalid:'Dokumen atau gambar wajib belum lengkap.',invalid_image:'Format gambar tidak sah.',invalid_evidence:'Format dokumen bukti tidak sah.',file_too_large:'Saiz fail terlalu besar selepas diproses. Cuba screenshot/kecilkan fail dan cuba lagi.',invalid_image_role:'Bahagian gambar tidak dikenali. Refresh halaman dan cuba semula.',upload_failed:'Upload gagal. Cuba semula dengan JPG/PNG atau PDF untuk dokumen SSM.',server_error:'Server belum berjaya memproses permohonan.'};err(map[x.message]||x.message||'Permohonan belum berjaya dihantar.');clearProg()}finally{SEND.disabled=false;PRE.disabled=false}
+ window.MMTrack?.send('submit_success',{target:'merchant_registration',status:d.status||'saved'});F.style.display='none';document.querySelector('.actions').style.display='none';clearProg();O.classList.add('on');const pct=Number.isFinite(Number(d.completionScore))?Number(d.completionScore):null;O.querySelector('p').textContent=d.status==='incomplete'?'Pendaftaran awal anda sudah disimpan'+(pct!==null?' ('+pct+'% lengkap)':'')+'. Tak apa kalau belum lengkap — simpan nombor rujukan ini untuk sambung kemudian.':'Permohonan lengkap anda sudah diterima untuk semakan.';document.getElementById('ref').textContent=d.reference||'Diterima';localStorage.removeItem('mmMerchantDraft');O.scrollIntoView({behavior:'smooth'});
+ }catch(x){window.MMTrack?.send('submit_error',{target:'merchant_registration'});const map={too_many_attempts:'Terlalu banyak cubaan. Cuba semula selepas satu jam.',draft_invalid_or_expired:'Sesi pendaftaran tamat. Sila cuba hantar semula.',validation_failed:'Ada format maklumat yang tidak sah. Anda masih boleh kosongkan field itu dan cuba simpan semula.',files_required_or_invalid:'Ada fail yang tidak dapat diproses. Buang fail bermasalah dan cuba simpan semula.',invalid_image:'Format gambar tidak sah.',invalid_evidence:'Format dokumen bukti tidak sah.',file_too_large:'Saiz fail terlalu besar selepas diproses. Cuba screenshot/kecilkan fail dan cuba lagi.',invalid_image_role:'Bahagian gambar tidak dikenali. Refresh halaman dan cuba semula.',upload_failed:'Upload gagal. Cuba semula dengan JPG/PNG atau PDF untuk dokumen SSM.',server_error:'Server belum berjaya memproses permohonan.'};err(map[x.message]||x.message||'Permohonan belum berjaya dihantar.');clearProg()}finally{SEND.disabled=false;PRE.disabled=false}
 };
 </script>
 </body></html>
