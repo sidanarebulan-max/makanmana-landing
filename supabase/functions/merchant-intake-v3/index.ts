@@ -252,7 +252,6 @@ Deno.serve(async(req:Request)=>{
       if(action==="finalize"){
         const draftId=t(body?.draftId,60),draftToken=t(body?.draftToken,200),draft=await getDraft(db,draftId,draftToken);
         if(!draft)return json(origin,401,{ok:false,error:"draft_invalid_or_expired"});
-        if(t(body?.company_fax,200))return json(origin,200,{ok:true,reference:"received"});
         const p=body?.payload||{},errs:string[]=[];
         const ownerName=t(p.ownerName,160),representativeRole=t(p.representativeRole,40),contactName=t(p.contactName,160),contactPhone=t(p.contactPhone,40),contactEmail=t(p.contactEmail,250).toLowerCase();
         const legalName=t(p.legalName,240),registrationNumber=t(p.registrationNumber,100),evidenceType=t(p.evidenceType,50),evidenceDeferred=p.evidenceDeferred===true;
