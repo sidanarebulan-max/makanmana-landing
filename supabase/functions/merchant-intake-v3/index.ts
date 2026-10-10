@@ -1,5 +1,5 @@
 
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2.57.4";
 
 const ALLOWED_ORIGINS = new Set([
   "https://www.makanmana.app",
@@ -58,7 +58,7 @@ function cleanMenu(input:any){
     const price=Number(x?.price),available=Boolean(x?.available);
     if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)||ids.has(id))throw new Error("invalid_menu_items");
     ids.add(id);
-    if(!["makanan","minuman"].includes(section)||category.length<2||name.length<2||!Number.isFinite(price)||price<0||price>100000||Math.abs(price*100-Math.round(price*100))>1e-6)throw new Error("invalid_menu_items");
+    if(x?.price===null||x?.price===undefined||x?.price===""||!["makanan","minuman"].includes(section)||category.length<2||name.length<2||!Number.isFinite(price)||price<0||price>100000||Math.abs(price*100-Math.round(price*100))>1e-6)throw new Error("invalid_menu_items");
     if(imageKey){if(images.has(imageKey))throw new Error("invalid_menu_items");images.add(imageKey);}
     return {id,section,category,name,description,price,currency:"MYR",available,imageKey,sortOrder:i};
   });
@@ -84,11 +84,63 @@ function refCode(){
   return `MM-${d.getUTCFullYear()}${String(d.getUTCMonth()+1).padStart(2,"0")}${String(d.getUTCDate()).padStart(2,"0")}-${rnd}`;
 }
 function uuid(v:string){return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);}
-async function getDraft(db:any,id:string,rawToken:string){
+async function getDraft(db:any,id:string,rawToken:string,allowFinalized=false){
   if(!uuid(id)||rawToken.length<20)return null;
   const {data}=await db.from("merchant_intake_drafts").select("*").eq("id",id).maybeSingle();
-  if(!data||data.status!=="draft"||new Date(data.expires_at).getTime()<=Date.now())return null;
+  if(!data||(data.status!=="draft"&&!(allowFinalized&&data.status==="finalized"))||(data.status==="draft"&&new Date(data.expires_at).getTime()<=Date.now()))return null;
   return (await sha(rawToken))===data.token_hash?data:null;
+}
+
+const consentFlag=(v:any)=>typeof v==="boolean"?v:null;
+function snapshotPayload(p:any={}){
+  const rawMenu=Array.isArray(p.menuItems)?p.menuItems.slice(0,30).map((x:any,i:number)=>({
+    id:t(x?.id,60)||crypto.randomUUID(),
+    section:["makanan","minuman"].includes(t(x?.section,20))?t(x?.section,20):"makanan",
+    category:t(x?.category,80),
+    name:t(x?.name,120),
+    description:t(x?.description,400),
+    price:(x?.price===""||x?.price===null||x?.price===undefined)?null:Number(x.price),
+    currency:"MYR",
+    available:x?.available!==false,
+    imageKey:t(x?.imageKey,600),
+    sortOrder:i
+  })):[];
+  const snapshot={
+    flexibleDraft:true,
+    preferredLanguage:t(p.preferredLanguage,5)==="en"?"en":"ms",
+    ownerName:t(p.ownerName,160),representativeRole:t(p.representativeRole,40)||"owner",contactName:t(p.contactName,160),
+    contactPhone:t(p.contactPhone,40),contactEmail:t(p.contactEmail,250).toLowerCase(),legalName:t(p.legalName,240),
+    registrationNumber:t(p.registrationNumber,100),evidenceType:t(p.evidenceType,50)||"registration_document",
+    officialName:t(p.officialName,240),displayName:t(p.displayName,240),branchName:t(p.branchName,160),
+    addressLine1:t(p.addressLine1,300),addressLine2:t(p.addressLine2,300),state:t(p.state,100),district:t(p.district,100),
+    city:t(p.city,100),locality:t(p.locality,120),postcode:t(p.postcode,10),googleMapsUrl:t(p.googleMapsUrl,1500),
+    latitude:p.latitude==null?null:Number(p.latitude),
+    longitude:p.longitude==null?null:Number(p.longitude),
+    phone:t(p.phone,40),whatsapp:t(p.whatsapp,40),website:t(p.website,500),instagram:t(p.instagram,500),facebook:t(p.facebook,500),tiktok:t(p.tiktok,500),
+    primaryCategory:t(p.primaryCategory,100),cuisineTags:arr(p.cuisineTags),foodTags:arr(p.foodTags),signatureDishes:arr(p.signatureDishes),
+    priceRange:t(p.priceRange,20)||"unknown",serviceModes:arr(p.serviceModes),amenities:arr(p.amenities),
+    shortDescription:t(p.shortDescription,1000),openingHours:p.openingHours&&typeof p.openingHours==="object"?p.openingHours:{},
+    specialHours:t(p.specialHours,500),menuItems:rawMenu,evidenceDeferred:p.evidenceDeferred===true,
+    consentAcknowledged:p.consentAcknowledged===true,
+    consent:consentFlag(p.consent),privacyNoticeAccepted:consentFlag(p.privacyNoticeAccepted),termsAccepted:consentFlag(p.termsAccepted),accuracy:consentFlag(p.accuracy),
+    marketingOptIn:typeof p.marketingOptIn==="boolean"?p.marketingOptIn:null,
+    consentVersion:t(p.consentVersion,100),privacyNoticeVersion:t(p.privacyNoticeVersion,100),termsVersion:t(p.termsVersion,100),
+    consentRecordedAt:t(p.consentRecordedAt,100),
+    sourcePage:t(p.sourcePage,500)||"/daftar-kedai.html"
+  };
+  return snapshot;
+}
+async function saveSnapshot(db:any,id:string,p:any){
+ const snapshot=snapshotPayload(p);
+ const {data,error}=await db.from("merchant_intake_drafts").update({payload_snapshot:snapshot,snapshot_saved_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("id",id).eq("status","draft").select("id").single();
+ if(error||!data)throw new Error("snapshot_failed");
+ return snapshot;
+}
+async function receipt(db:any,draft:any){
+ let query=draft.registration_id?db.from("merchant_registrations").select("id,reference_code,status").eq("id",draft.registration_id):db.from("merchant_partial_registrations").select("id,reference_code,status,completion_score,missing_fields,invalid_fields").eq("draft_id",draft.id);
+ const {data,error}=await query.maybeSingle();if(error)throw error;
+ if(!data)return null;
+ return {ok:true,submissionId:data.id,draftId:draft.id,reference:data.reference_code,status:data.status,completionScore:data.completion_score??100,missingFields:data.missing_fields||[],invalidFields:data.invalid_fields||[],persisted:true};
 }
 
 async function forwardEmailEvent(db:any,eventKey:string){
@@ -138,51 +190,26 @@ Deno.serve(async(req:Request)=>{
         const ip=req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()||req.headers.get("cf-connecting-ip")||"unknown";
         const ipHash=await sha(ip),oneHourAgo=new Date(Date.now()-3600000).toISOString();
         const {count}=await db.from("merchant_intake_attempts").select("id",{count:"exact",head:true}).eq("ip_hash",ipHash).gte("created_at",oneHourAgo);
-        if((count||0)>=5)return json(origin,429,{ok:false,error:"too_many_attempts"});
+        if((count||0)>=20)return json(origin,429,{ok:false,error:"too_many_attempts"});
         await db.from("merchant_intake_attempts").insert({ip_hash:ipHash});
         const raw=token(),hash=await sha(raw);
-        const {data,error}=await db.from("merchant_intake_drafts").insert({token_hash:hash,ip_hash:ipHash}).select("id,expires_at").single();
+        const initial=body.payload&&typeof body.payload==="object"?snapshotPayload(body.payload):null;
+        const {data,error}=await db.from("merchant_intake_drafts").insert({token_hash:hash,ip_hash:ipHash,payload_snapshot:initial,snapshot_saved_at:initial?new Date().toISOString():null}).select("id,expires_at").single();
         if(error||!data)throw new Error("draft_create_failed");
         return json(origin,200,{ok:true,draftId:data.id,draftToken:raw,expiresAt:data.expires_at});
+      }
+
+      if(action==="status"){
+        const draft=await getDraft(db,t(body.draftId,60),t(body.draftToken,200),true);
+        if(!draft)return json(origin,401,{ok:false,error:"draft_invalid_or_expired"});
+        const saved=await receipt(db,draft);
+        return json(origin,200,saved||{ok:true,status:"draft",draftId:draft.id,snapshotSaved:!!draft.payload_snapshot});
       }
 
       if(action==="snapshot"){
         const draftId=t(body?.draftId,60),draftToken=t(body?.draftToken,200),draft=await getDraft(db,draftId,draftToken);
         if(!draft)return json(origin,401,{ok:false,error:"draft_invalid_or_expired"});
-        const p=body?.payload||{};
-        if(p.consentAcknowledged!==true)return json(origin,422,{ok:false,error:"consent_required"});
-        const rawMenu=Array.isArray(p.menuItems)?p.menuItems.slice(0,30).map((x:any,i:number)=>({
-          id:t(x?.id,60)||crypto.randomUUID(),
-          section:["makanan","minuman"].includes(t(x?.section,20))?t(x?.section,20):"makanan",
-          category:t(x?.category,80),
-          name:t(x?.name,120),
-          description:t(x?.description,400),
-          price:(x?.price===""||x?.price===null||x?.price===undefined)?null:Number(x.price),
-          currency:"MYR",
-          available:x?.available!==false,
-          imageKey:t(x?.imageKey,600),
-          sortOrder:i
-        })):[];
-        const snapshot={
-          flexibleDraft:true,
-          preferredLanguage:t(p.preferredLanguage,5)==="en"?"en":"ms",
-          ownerName:t(p.ownerName,160),representativeRole:t(p.representativeRole,40)||"owner",contactName:t(p.contactName,160),
-          contactPhone:t(p.contactPhone,40),contactEmail:t(p.contactEmail,250).toLowerCase(),legalName:t(p.legalName,240),
-          registrationNumber:t(p.registrationNumber,100),evidenceType:t(p.evidenceType,50)||"registration_document",
-          officialName:t(p.officialName,240),displayName:t(p.displayName,240),branchName:t(p.branchName,160),
-          addressLine1:t(p.addressLine1,300),addressLine2:t(p.addressLine2,300),state:t(p.state,100),district:t(p.district,100),
-          city:t(p.city,100),locality:t(p.locality,120),postcode:t(p.postcode,10),googleMapsUrl:t(p.googleMapsUrl,1500),
-          latitude:p.latitude===null||p.latitude===""||p.latitude===undefined?null:Number(p.latitude),
-          longitude:p.longitude===null||p.longitude===""||p.longitude===undefined?null:Number(p.longitude),
-          phone:t(p.phone,40),whatsapp:t(p.whatsapp,40),website:t(p.website,500),instagram:t(p.instagram,500),facebook:t(p.facebook,500),tiktok:t(p.tiktok,500),
-          primaryCategory:t(p.primaryCategory,100),cuisineTags:arr(p.cuisineTags),foodTags:arr(p.foodTags),signatureDishes:arr(p.signatureDishes),
-          priceRange:t(p.priceRange,20)||"unknown",serviceModes:arr(p.serviceModes),amenities:arr(p.amenities),
-          shortDescription:t(p.shortDescription,1000),openingHours:p.openingHours&&typeof p.openingHours==="object"?p.openingHours:{},
-          specialHours:t(p.specialHours,500),menuItems:rawMenu,consentAcknowledged:true,marketingOptIn:Boolean(p.marketingOptIn),
-          sourcePage:t(p.sourcePage,500)||"/daftar-kedai.html"
-        };
-        const {error}=await db.from("merchant_intake_drafts").update({payload_snapshot:snapshot,snapshot_saved_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("id",draftId);
-        if(error)throw new Error("snapshot_failed");
+        await saveSnapshot(db,draftId,body?.payload||{});
         return json(origin,200,{ok:true,status:"snapshot_saved"});
       }
 
@@ -250,17 +277,21 @@ Deno.serve(async(req:Request)=>{
       }
 
       if(action==="finalize"){
-        const draftId=t(body?.draftId,60),draftToken=t(body?.draftToken,200),draft=await getDraft(db,draftId,draftToken);
+        const draftId=t(body?.draftId,60),draftToken=t(body?.draftToken,200),draft=await getDraft(db,draftId,draftToken,true);
         if(!draft)return json(origin,401,{ok:false,error:"draft_invalid_or_expired"});
-        const p=body?.payload||{},errs:string[]=[];
-        const ownerName=t(p.ownerName,160),representativeRole=t(p.representativeRole,40),contactName=t(p.contactName,160),contactPhone=t(p.contactPhone,40),contactEmail=t(p.contactEmail,250).toLowerCase();
-        const legalName=t(p.legalName,240),registrationNumber=t(p.registrationNumber,100),evidenceType=t(p.evidenceType,50),evidenceDeferred=p.evidenceDeferred===true;
+        const existing=await receipt(db,draft);
+        if(existing)return json(origin,200,existing);
+        if(draft.status!=="draft")return json(origin,409,{ok:false,error:"finalize_unconfirmed"});
+        const p=await saveSnapshot(db,draftId,body?.payload||draft.payload_snapshot||{}),flexibleDraft=true,errs:string[]=[];
+        const ownerName=t(p.ownerName,160),representativeRole=t(p.representativeRole,40)||"owner",contactName=t(p.contactName,160),contactPhone=t(p.contactPhone,40),contactEmail=t(p.contactEmail,250).toLowerCase();
+        const legalName=t(p.legalName,240),registrationNumber=t(p.registrationNumber,100),evidenceType=t(p.evidenceType,50)||"registration_document",evidenceDeferred=p.evidenceDeferred===true;
         const officialName=t(p.officialName,240),displayName=t(p.displayName,240),branchName=t(p.branchName,160);
         const addressLine1=t(p.addressLine1,300),addressLine2=t(p.addressLine2,300),state=t(p.state,100),district=t(p.district,100),city=t(p.city,100),locality=t(p.locality,120),postcode=t(p.postcode,10);
         const googleMapsUrl=t(p.googleMapsUrl,1500),businessPhone=t(p.phone,40),whatsapp=t(p.whatsapp,40);
         const website=t(p.website,500),instagram=t(p.instagram,500),facebook=t(p.facebook,500),tiktok=t(p.tiktok,500),primaryCategory=t(p.primaryCategory,100),shortDescription=t(p.shortDescription,1000),specialHours=t(p.specialHours,500);
-        const lat=p.latitude===null||p.latitude===""||p.latitude===undefined?null:Number(p.latitude),lng=p.longitude===null||p.longitude===""||p.longitude===undefined?null:Number(p.longitude);
+        const lat=p.latitude==null?null:Number(p.latitude),lng=p.longitude==null?null:Number(p.longitude);
         const priceRange=t(p.priceRange,20)||"unknown";
+        const consentOk=p.consent===true&&p.privacyNoticeAccepted===true&&p.termsAccepted===true&&p.accuracy===true;
         if(ownerName.length<2)errs.push("ownerName");
         if(!["owner","authorized_representative"].includes(representativeRole))errs.push("representativeRole");
         if(contactName.length<2)errs.push("contactName");
@@ -277,23 +308,124 @@ Deno.serve(async(req:Request)=>{
         if(!["budget","moderate","premium","unknown"].includes(priceRange))errs.push("priceRange");
         if(!validHours(p.openingHours))errs.push("openingHours");
         if(!evidenceTypes.has(evidenceType))errs.push("evidenceType");
-        if(evidenceType==="registration_document"&&!registrationNumber)errs.push("registrationNumber");
         if(representativeRole==="authorized_representative"&&evidenceType!=="authorization_letter")errs.push("authorizationLetter");
-        if(p.consent!==true||p.privacyNoticeAccepted!==true||p.termsAccepted!==true||p.accuracy!==true||typeof p.marketingOptIn!=="boolean")errs.push("consent");
+        if(!consentOk||typeof p.marketingOptIn!=="boolean")errs.push("consent");
+
         let menuItems:any[]=[];
         try{menuItems=cleanMenu(p.menuItems||[]);}catch{errs.push("menuItems");}
-        if(errs.length)return json(origin,422,{ok:false,error:"validation_failed",fields:errs});
+        const rawMenu=Array.isArray(p.menuItems)?p.menuItems.slice(0,30).map((x:any,i:number)=>({
+          id:t(x?.id,60)||crypto.randomUUID(),
+          section:["makanan","minuman"].includes(t(x?.section,20))?t(x?.section,20):"makanan",
+          category:t(x?.category,80),
+          name:t(x?.name,120),
+          description:t(x?.description,400),
+          price:(x?.price===""||x?.price===null||x?.price===undefined)?null:Number(x.price),
+          currency:"MYR",
+          available:x?.available!==false,
+          imageKey:t(x?.imageKey,600),
+          sortOrder:i
+        })):[];
 
-        const {data:files}=await db.from("merchant_intake_draft_files").select("role,menu_item_id,storage_key,evidence_type").eq("draft_id",draftId);
+        const {data:files,error:filesError}=await db.from("merchant_intake_draft_files")
+          .select("role,menu_item_id,storage_key,evidence_type,mime_type,size_bytes")
+          .eq("draft_id",draftId);
+        if(filesError)throw filesError;
         const roles=new Set((files||[]).map((f:any)=>f.role));
-        for(const r of ["storefront","food","menu"])if(!roles.has(r))errs.push(r); if(!evidenceDeferred&&!roles.has("evidence"))errs.push("evidence");
+        const fileErrs:string[]=[];
+        for(const r of ["storefront","food","menu"])if(!roles.has(r))fileErrs.push(r);
+        if(!roles.has("evidence"))fileErrs.push("evidence");
         const ev=(files||[]).find((f:any)=>f.role==="evidence");
-        if(ev&&ev.evidence_type!==evidenceType)errs.push("evidenceType");
+        if(ev&&ev.evidence_type!==evidenceType)fileErrs.push("evidenceType");
         const byItem=new Map((files||[]).filter((f:any)=>f.role==="menu-item").map((f:any)=>[String(f.menu_item_id),String(f.storage_key)]));
         for(const item of menuItems){
-          if(item.imageKey&&byItem.get(item.id)!==item.imageKey)errs.push("menuImage");
+          if(item.imageKey&&byItem.get(item.id)!==item.imageKey)fileErrs.push("menuImage");
         }
-        if(errs.length)return json(origin,422,{ok:false,error:"files_required_or_invalid",fields:[...new Set(errs)]});
+
+        if(!menuItems.length)errs.push("menuItems");
+        const allErrs=[...new Set([...errs,...fileErrs])];
+        if(flexibleDraft&&allErrs.length){
+          const missing:string[]=[];
+          const add=(ok:boolean,name:string)=>{if(!ok)missing.push(name)};
+          add(ownerName.length>=2,"ownerName");
+          add(contactName.length>=2,"contactName");
+          add(phone(contactPhone)||email(contactEmail),"contact");
+          add(officialName.length>=2||displayName.length>=2,"shopName");
+          add(!!primaryCategory,"primaryCategory");
+          add(!!addressLine1,"addressLine1");
+          add(!!state,"state");
+          add(!!city,"city");
+          add(/^\d{5}$/.test(postcode),"postcode");
+          add((!!googleMapsUrl&&mapsUrl(googleMapsUrl))||(lat!==null&&lng!==null&&Number.isFinite(lat)&&Number.isFinite(lng)&&Math.abs(lat)<=90&&Math.abs(lng)<=180),"location");
+          add(phone(businessPhone)||phone(whatsapp),"shopContact");
+          add(shortDescription.length>=20,"description");
+          add(arr(p.cuisineTags).length>0,"cuisineTags");
+          add(arr(p.foodTags).length>0,"foodTags");
+          add(validHours(p.openingHours),"openingHours");
+          add(roles.has("storefront"),"storefront");
+          add(roles.has("food"),"foodPhoto");
+          add(roles.has("menu"),"menuPhoto");
+          add(roles.has("evidence"),"evidence");
+          add(rawMenu.length>0,"menuItems");
+
+          if(!consentOk)missing.push("consent");
+          const invalid:string[]=[];
+          if(rawMenu.length&&errs.includes("menuItems"))invalid.push("menuItems");
+          if(contactEmail&&!email(contactEmail))invalid.push("contactEmail");
+          if(contactPhone&&!phone(contactPhone))invalid.push("contactPhone");
+          if(businessPhone&&!phone(businessPhone))invalid.push("phone");
+          if(whatsapp&&!phone(whatsapp))invalid.push("whatsapp");
+          if(postcode&&!/^\d{5}$/.test(postcode))invalid.push("postcode");
+          if(googleMapsUrl&&!mapsUrl(googleMapsUrl))invalid.push("googleMapsUrl");
+          if(![website,instagram,facebook,tiktok].every(httpsUrl))invalid.push("socialUrl");
+          if((lat===null)!==(lng===null)||(lat!==null&&(!Number.isFinite(lat)||Math.abs(lat)>90))||(lng!==null&&(!Number.isFinite(lng)||Math.abs(lng)>180)))invalid.push("coordinates");
+
+          const total=21,score=Math.max(0,Math.min(100,Math.round(((total-missing.length)/total)*100)));
+          const reference=refCode();
+          const partialPayload={
+            flexibleDraft:true,
+            preferredLanguage:t(p.preferredLanguage,5)==="en"?"en":"ms",
+            ownerName,representativeRole,contactName,contactPhone,contactEmail,legalName,registrationNumber,evidenceType,evidenceDeferred:!roles.has("evidence"),
+            officialName,displayName,branchName,addressLine1,addressLine2,state,district,city,locality,postcode,
+            googleMapsUrl,latitude:lat,longitude:lng,phone:businessPhone,whatsapp,website,instagram,facebook,tiktok,
+            primaryCategory,cuisineTags:arr(p.cuisineTags),foodTags:arr(p.foodTags),signatureDishes:arr(p.signatureDishes),
+            priceRange,serviceModes:arr(p.serviceModes),amenities:arr(p.amenities),shortDescription,
+            openingHours:p.openingHours||{},specialHours,
+            consentAcknowledged:p.consentAcknowledged===true,consent:p.consent,
+            privacyNoticeAccepted:p.privacyNoticeAccepted,termsAccepted:p.termsAccepted,accuracy:p.accuracy,
+            marketingOptIn:p.marketingOptIn,
+            consentVersion:CONSENT_VERSION,privacyNoticeVersion:PRIVACY_VERSION,termsVersion:TERMS_VERSION,
+            consentRecordedAt:p.consentAcknowledged===true||consentOk?new Date().toISOString():null,
+            sourcePage:t(p.sourcePage,500)||"/daftar-kedai.html"
+          };
+          const partialRecord={
+            reference_code:reference,
+            draft_id:draftId,
+            status:"incomplete",
+            display_name:displayName||officialName||null,
+            contact_name:contactName||ownerName||null,
+            contact_phone:contactPhone||whatsapp||businessPhone||null,
+            contact_email:contactEmail||null,
+            completion_score:score,
+            missing_fields:missing,
+            invalid_fields:[...new Set(invalid)],
+            payload:partialPayload,
+            menu_items:rawMenu,
+            file_manifest:files||[],
+            consent_version:CONSENT_VERSION,
+            privacy_version:PRIVACY_VERSION,
+            terms_version:TERMS_VERSION,
+            consent_recorded_at:p.consentAcknowledged===true||consentOk?new Date().toISOString():null,
+            source_page:t(p.sourcePage,500)||"/daftar-kedai.html"
+          };
+          const {error:partialError}=await db.rpc("finalize_merchant_partial_v1",{p_draft_id:draftId,p_record:partialRecord});
+          if(partialError)throw new Error("partial_finalize_failed");
+          const saved=await receipt(db,{...draft,status:"finalized"});
+          if(!saved)throw new Error("finalize_unconfirmed");
+          return json(origin,200,saved);
+        }
+
+        if(errs.length)return json(origin,422,{ok:false,error:"validation_failed",fields:[...new Set(errs)]});
+        if(fileErrs.length)return json(origin,422,{ok:false,error:"files_required_or_invalid",fields:[...new Set(fileErrs)]});
 
         const cleanPayload={
           ownerName,representativeRole,contactName,contactPhone,contactEmail,legalName,registrationNumber,evidenceType,evidenceDeferred,
@@ -312,26 +444,30 @@ Deno.serve(async(req:Request)=>{
         if(error)throw new Error("finalize_failed");
         const preferredLanguage=cleanPayload.preferredLanguage==="en"?"en":"ms";
         await db.from("merchant_registrations").update({preferred_language:preferredLanguage}).eq("id",data);
-        const eventKey="merchant-registration-received:"+String(data);
-        const {error:emailQueueError}=await db.from("merchant_email_outbox").upsert({
-          event_key:eventKey,
-          trigger_event:"merchant.registration.created",
-          recipient_email:contactEmail,
-          preferred_language:preferredLanguage,
-          variables:{
-            user_name:contactName||ownerName,
-            merchant_name:contactName||ownerName,
-            restaurant_name:displayName,
-            reference_id:reference,
-            email:contactEmail
-          },
-          status:"pending",
-          available_at:new Date().toISOString(),
-          last_error:null
-        },{onConflict:"event_key"});
-        if(emailQueueError)console.error("merchant-email-queue",emailQueueError.message);
-        else await forwardEmailEvent(db,eventKey);
-        return json(origin,200,{ok:true,submissionId:data,reference,status:"submitted"});
+        if(email(contactEmail)&&!/@[^@]+\.(invalid|test|example)$/i.test(contactEmail)){
+          const eventKey="merchant-registration-received:"+String(data);
+          const {error:emailQueueError}=await db.from("merchant_email_outbox").upsert({
+            event_key:eventKey,
+            trigger_event:"merchant.registration.created",
+            recipient_email:contactEmail,
+            preferred_language:preferredLanguage,
+            variables:{
+              user_name:contactName||ownerName,
+              merchant_name:contactName||ownerName,
+              restaurant_name:displayName,
+              reference_id:reference,
+              email:contactEmail
+            },
+            status:"pending",
+            available_at:new Date().toISOString(),
+            last_error:null
+          },{onConflict:"event_key"});
+          if(emailQueueError)console.error("merchant-email-queue",emailQueueError.message);
+          else await forwardEmailEvent(db,eventKey);
+        }
+        const saved=await receipt(db,{...draft,registration_id:data});
+        if(!saved)throw new Error("finalize_unconfirmed");
+        return json(origin,200,saved);
       }
       return json(origin,400,{ok:false,error:"unknown_action"});
     }
@@ -341,6 +477,7 @@ Deno.serve(async(req:Request)=>{
       if(action!=="upload")return json(origin,400,{ok:false,error:"unknown_action"});
       const draftId=t(form.get("draftId"),60),draftToken=t(form.get("draftToken"),200),draft=await getDraft(db,draftId,draftToken);
       if(!draft)return json(origin,401,{ok:false,error:"draft_invalid_or_expired"});
+      if(!draft.payload_snapshot)return json(origin,409,{ok:false,error:"snapshot_required"});
       const role=t(form.get("role"),30),file=form.get("file");
       if(!(file instanceof File)||file.size===0)return json(origin,422,{ok:false,error:"file_required"});
       const isEvidence=role==="evidence";
@@ -351,31 +488,31 @@ Deno.serve(async(req:Request)=>{
       const kind=await magic(file,isEvidence);
       if(!kind)return json(origin,422,{ok:false,error:isEvidence?"invalid_evidence":"invalid_image"});
       let menuItemId:string|null=null,evidenceType:string|null=null;
+      let existing:any=null;
       if(isMenu){
         menuItemId=t(form.get("menuItemId"),60);
         if(!uuid(menuItemId))return json(origin,422,{ok:false,error:"invalid_menu_item_id"});
         const {count}=await db.from("merchant_intake_draft_files").select("id",{count:"exact",head:true}).eq("draft_id",draftId).eq("role","menu-item");
-        const {data:existing}=await db.from("merchant_intake_draft_files").select("id,storage_key").eq("draft_id",draftId).eq("role","menu-item").eq("menu_item_id",menuItemId).maybeSingle();
+        const found=await db.from("merchant_intake_draft_files").select("id,storage_key").eq("draft_id",draftId).eq("role","menu-item").eq("menu_item_id",menuItemId).maybeSingle();
+        if(found.error)throw found.error;existing=found.data;
         if(!existing&&(count||0)>=30)return json(origin,422,{ok:false,error:"menu_image_limit"});
-        if(existing){await db.storage.from(MEDIA_BUCKET).remove([existing.storage_key]);await db.from("merchant_intake_draft_files").delete().eq("id",existing.id);}
       }else{
         if(isEvidence){
           evidenceType=t(form.get("evidenceType"),50);
           if(!evidenceTypes.has(evidenceType))return json(origin,422,{ok:false,error:"invalid_evidence_type"});
         }
-        const {data:existing}=await db.from("merchant_intake_draft_files").select("id,storage_key").eq("draft_id",draftId).eq("role",role).maybeSingle();
-        if(existing){
-          await db.storage.from(isEvidence?EVIDENCE_BUCKET:MEDIA_BUCKET).remove([existing.storage_key]);
-          await db.from("merchant_intake_draft_files").delete().eq("id",existing.id);
-        }
+        const found=await db.from("merchant_intake_draft_files").select("id,storage_key").eq("draft_id",draftId).eq("role",role).maybeSingle();
+        if(found.error)throw found.error;existing=found.data;
       }
       const bucket=isEvidence?EVIDENCE_BUCKET:MEDIA_BUCKET;
       const folder=isEvidence?evidenceType!:role;
       const path=isMenu?`${draftId}/menu-item/${menuItemId}/${crypto.randomUUID()}.${kind.ext}`:`${draftId}/${folder}/${crypto.randomUUID()}.${kind.ext}`;
       const {error:up}=await db.storage.from(bucket).upload(path,file,{contentType:kind.mime,upsert:false});
       if(up)throw new Error("upload_failed");
-      const {error:meta}=await db.from("merchant_intake_draft_files").insert({draft_id:draftId,role,menu_item_id:menuItemId,evidence_type:evidenceType,storage_key:path,mime_type:kind.mime,size_bytes:file.size});
+      const metadata={draft_id:draftId,role,menu_item_id:menuItemId,evidence_type:evidenceType,storage_key:path,mime_type:kind.mime,size_bytes:file.size};
+      const {error:meta}=existing?await db.from("merchant_intake_draft_files").update(metadata).eq("id",existing.id):await db.from("merchant_intake_draft_files").insert(metadata);
       if(meta){await db.storage.from(bucket).remove([path]);throw new Error("upload_metadata_failed");}
+      if(existing)await db.storage.from(bucket).remove([existing.storage_key]);
       return json(origin,200,{ok:true,key:path,role,menuItemId});
     }
     return json(origin,415,{ok:false,error:"unsupported_content_type"});
