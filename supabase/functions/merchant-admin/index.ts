@@ -85,32 +85,47 @@ Deno.serve(async(req:Request)=>{
  if(p.action==='detail'){
   if(!['registration','partial','draft','waitlist'].includes(p.type)||!/^[-a-f0-9]{36}$/.test(p.id))return response({error:'invalid_entity'},400);
   async function signed(rows:any[],bucket:string){return await Promise.all(rows.map(async r=>{const s=await db.storage.from(bucket).createSignedUrl(r.storage_key,600);return {...r,url:s.error?null:safeUrl(s.data.signedUrl),file_error:!!s.error};}));}
+  function partialRow(partial:any){const x=partial.payload||{};return {
+    id:partial.id,reference_code:partial.reference_code,status:partial.status,
+    owner_name:x.ownerName||'',representative_role:x.representativeRole||'owner',contact_name:partial.contact_name||x.contactName||'',contact_phone:partial.contact_phone||x.contactPhone||'',contact_email:partial.contact_email||x.contactEmail||'',
+    legal_name:x.legalName||'',registration_number:x.registrationNumber||'',official_name:x.officialName||partial.display_name||'',display_name:partial.display_name||x.displayName||x.officialName||'',branch_name:x.branchName||'',
+    address_line1:x.addressLine1||'',address_line2:x.addressLine2||'',state:x.state||'',district:x.district||'',city:x.city||'',locality:x.locality||'',postcode:x.postcode||'',google_maps_url:x.googleMapsUrl||'',latitude:x.latitude??null,longitude:x.longitude??null,
+    business_phone:x.phone||'',whatsapp:x.whatsapp||'',website:x.website||'',instagram:x.instagram||'',facebook:x.facebook||'',tiktok:x.tiktok||'',
+    primary_category:x.primaryCategory||'',cuisine_tags:x.cuisineTags||[],food_tags:x.foodTags||[],signature_dishes:x.signatureDishes||[],price_range:x.priceRange||'unknown',service_modes:x.serviceModes||[],amenities:x.amenities||[],short_description:x.shortDescription||'',
+    opening_hours:x.openingHours||{},special_hours:x.specialHours||'',marketing_opt_in:Boolean(x.marketingOptIn),
+    consent_version:partial.consent_version,privacy_version:partial.privacy_version,terms_version:partial.terms_version,consent_recorded_at:partial.consent_recorded_at,consent_record_status:'partial',
+    source_page:partial.source_page||x.sourcePage||'',created_at:partial.created_at,updated_at:partial.updated_at,completion_score:partial.completion_score,missing_fields:partial.missing_fields||[],invalid_fields:partial.invalid_fields||[],draft_id:partial.draft_id
+  };}
+  function draftRow(draft:any){const x=draft.payload_snapshot||{};return {
+    id:draft.id,reference_code:'DRAFT-'+String(draft.id).slice(0,8).toUpperCase(),status:draft.status,
+    owner_name:x.ownerName||'',representative_role:x.representativeRole||'owner',contact_name:x.contactName||'',contact_phone:x.contactPhone||'',contact_email:x.contactEmail||'',legal_name:x.legalName||'',registration_number:x.registrationNumber||'',
+    official_name:x.officialName||'',display_name:x.displayName||x.officialName||'Draft upload',branch_name:x.branchName||'',address_line1:x.addressLine1||'',address_line2:x.addressLine2||'',state:x.state||'',district:x.district||'',city:x.city||'',locality:x.locality||'',postcode:x.postcode||'',google_maps_url:x.googleMapsUrl||'',latitude:x.latitude??null,longitude:x.longitude??null,
+    business_phone:x.phone||'',whatsapp:x.whatsapp||'',website:x.website||'',instagram:x.instagram||'',facebook:x.facebook||'',tiktok:x.tiktok||'',primary_category:x.primaryCategory||'',cuisine_tags:x.cuisineTags||[],food_tags:x.foodTags||[],signature_dishes:x.signatureDishes||[],price_range:x.priceRange||'unknown',service_modes:x.serviceModes||[],amenities:x.amenities||[],short_description:x.shortDescription||'',opening_hours:x.openingHours||{},special_hours:x.specialHours||'',marketing_opt_in:Boolean(x.marketingOptIn),
+    consent_record_status:x.consentAcknowledged===true?'snapshot_acknowledged':'not_recorded',source_page:x.sourcePage||'',created_at:draft.created_at,updated_at:draft.updated_at,snapshot_saved_at:draft.snapshot_saved_at,expires_at:draft.expires_at
+  };}
+  async function partialResponse(partial:any){const files=checked(await db.from('merchant_intake_draft_files').select('*').eq('draft_id',partial.draft_id).order('created_at',{ascending:true}));const media=files.filter((f:any)=>f.role!=='evidence'&&f.role!=='menu-item'),evidence=files.filter((f:any)=>f.role==='evidence'),menuImages=files.filter((f:any)=>f.role==='menu-item');return response({ok:true,row:partialRow(partial),events:[],media:await signed(media,'merchant-intake-media'),evidence:await signed(evidence,'merchant-intake-evidence'),menu_images:await signed(menuImages,'merchant-intake-media'),menu:partial.menu_items||[],workflow:[],partial:true});}
+  async function draftResponse(draft:any){const x=draft.payload_snapshot||{},files=checked(await db.from('merchant_intake_draft_files').select('*').eq('draft_id',draft.id).order('created_at',{ascending:true}));const media=files.filter((f:any)=>f.role!=='evidence'&&f.role!=='menu-item'),evidence=files.filter((f:any)=>f.role==='evidence'),menuImages=files.filter((f:any)=>f.role==='menu-item');return response({ok:true,row:draftRow(draft),events:[],media:await signed(media,'merchant-intake-media'),evidence:await signed(evidence,'merchant-intake-evidence'),menu_images:await signed(menuImages,'merchant-intake-media'),menu:Array.isArray(x.menuItems)?x.menuItems:[],workflow:[],draft:true});}
   if(p.type==='waitlist'){
     const row=checked(await db.from('merchant_waitlist').select('*').eq('id',p.id).single());
     const events=checked(await db.from('merchant_admin_review_events').select('*').eq('entity_type','waitlist').eq('entity_id',p.id).order('created_at',{ascending:false}).limit(100));
     return response({ok:true,row,events});
   }
-  if(p.type==='partial'){
-    const partial=checked(await db.from('merchant_partial_registrations').select('*').eq('id',p.id).single()),x=partial.payload||{};
-    const files=checked(await db.from('merchant_intake_draft_files').select('*').eq('draft_id',partial.draft_id).order('created_at',{ascending:true}));
-    const media=files.filter((f:any)=>f.role!=='evidence'&&f.role!=='menu-item'),evidence=files.filter((f:any)=>f.role==='evidence'),menuImages=files.filter((f:any)=>f.role==='menu-item');
-    const row={...x,id:partial.id,reference_code:partial.reference_code,status:partial.status,completion_score:partial.completion_score,missing_fields:partial.missing_fields,invalid_fields:partial.invalid_fields,created_at:partial.created_at,updated_at:partial.updated_at,display_name:partial.display_name||x.displayName||x.officialName,contact_name:partial.contact_name||x.contactName,contact_email:partial.contact_email||x.contactEmail,contact_phone:partial.contact_phone||x.contactPhone,draft_id:partial.draft_id};
-    return response({ok:true,row,events:[],media:await signed(media,'merchant-intake-media'),evidence:await signed(evidence,'merchant-intake-evidence'),menu_images:await signed(menuImages,'merchant-intake-media'),menu:partial.menu_items||[],workflow:[],partial:true});
+  if(p.type==='partial')return await partialResponse(checked(await db.from('merchant_partial_registrations').select('*').eq('id',p.id).single()));
+  if(p.type==='draft')return await draftResponse(checked(await db.from('merchant_intake_drafts').select('*').eq('id',p.id).single()));
+  const fullResult=await db.from('merchant_registrations').select('*').eq('id',p.id).maybeSingle();if(fullResult.error)throw fullResult.error;
+  if(!fullResult.data){
+    const partialResult=await db.from('merchant_partial_registrations').select('*').eq('id',p.id).maybeSingle();if(partialResult.error)throw partialResult.error;if(partialResult.data)return await partialResponse(partialResult.data);
+    const draftResult=await db.from('merchant_intake_drafts').select('*').eq('id',p.id).maybeSingle();if(draftResult.error)throw draftResult.error;if(draftResult.data)return await draftResponse(draftResult.data);
+    return response({error:'not_found'},404);
   }
-  if(p.type==='draft'){
-    const draft=checked(await db.from('merchant_intake_drafts').select('*').eq('id',p.id).single()),x=draft.payload_snapshot||{};
-    const files=checked(await db.from('merchant_intake_draft_files').select('*').eq('draft_id',p.id).order('created_at',{ascending:true}));
-    const media=files.filter((f:any)=>f.role!=='evidence'&&f.role!=='menu-item'),evidence=files.filter((f:any)=>f.role==='evidence'),menuImages=files.filter((f:any)=>f.role==='menu-item');
-    const row={...x,id:draft.id,reference_code:'DRAFT-'+String(draft.id).slice(0,8).toUpperCase(),status:draft.status,created_at:draft.created_at,updated_at:draft.updated_at,expires_at:draft.expires_at,snapshot_saved_at:draft.snapshot_saved_at,file_count:files.length};
-    return response({ok:true,row,events:[],media:await signed(media,'merchant-intake-media'),evidence:await signed(evidence,'merchant-intake-evidence'),menu_images:await signed(menuImages,'merchant-intake-media'),menu:Array.isArray(x.menuItems)?x.menuItems:[],workflow:[],draft:true});
-  }
-  const row=checked(await db.from('merchant_registrations').select('*').eq('id',p.id).single());
+  const row=fullResult.data;
   const events=checked(await db.from('merchant_admin_review_events').select('*').eq('entity_type','registration').eq('entity_id',p.id).order('created_at',{ascending:false}).limit(100));
   const [media,evidence,menuImages,menu,workflow]=await Promise.all([all('merchant_media',['registration_id',p.id]),all('merchant_evidence',['registration_id',p.id]),all('merchant_menu_media',['registration_id',p.id]),db.from('merchant_intake_menu_proposals').select('*').eq('registration_id',p.id).maybeSingle(),db.from('merchant_workflow_events').select('*').eq('registration_id',p.id).order('created_at',{ascending:false}).limit(100)]);
   return response({ok:true,row,events,media:await signed(media,'merchant-intake-media'),evidence:await signed(evidence,'merchant-intake-evidence'),menu_images:await signed(menuImages,'merchant-intake-media'),menu:checked(menu)?.menu_items||[],workflow:checked(workflow)});
  }
  if(p.action==='save_review'){
   if(!['registration','waitlist'].includes(p.type)||!['new','reviewing','needs_info','contacted','ready','hold'].includes(p.status)||typeof p.notes!=='string'||p.notes.length>10000||!Number.isInteger(p.version))return response({error:'invalid_review'},400);
+  if(p.type==='registration'){const exists=await db.from('merchant_registrations').select('id').eq('id',p.id).maybeSingle();if(exists.error)throw exists.error;if(!exists.data)return response({error:'full_registration_required'},400);}
   if(p.status==='ready'){
    if(p.type!=='registration')return response({error:'full_registration_required'},400);
    const d=await sourceData();const r=d.registrations.find(x=>x.id===p.id);if(!r)return response({error:'not_found'},404);const missing=gaps(r,d.media,d.evidence,d.menus);if(missing.length)return response({error:'missing_information',missing},400);
