@@ -20,7 +20,7 @@ a{color:inherit;text-decoration:none}.w{max-width:1160px;margin:auto;padding:0 2
 .btn{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:12px 20px;border:1px solid transparent;font-weight:800;cursor:pointer;min-height:44px}.btn.red{background:var(--r);color:#fff;box-shadow:0 10px 24px #e1261c22}.btn.outline{background:transparent;border-color:#2d272322}.btn:disabled{opacity:.55;cursor:not-allowed}
 .hero{padding:70px 0 46px}.hg{display:grid;grid-template-columns:1.15fr .85fr;gap:60px;align-items:end}.hero h1{font-size:clamp(70px,9vw,132px);margin:0}.hero h1 span{color:var(--r)}.hero p{font-size:16px;line-height:1.72;color:var(--g);max-width:720px}.prep{background:#fff;border:1px solid var(--l);border-radius:22px;padding:24px}.prep h3{margin:0 0 10px}.prep ul{padding-left:18px;margin:0;color:var(--g);line-height:1.75;font-size:13px}
 .steps{position:sticky;top:72px;z-index:30;background:#fff;border-block:1px solid var(--l)}.sr{display:flex;overflow:auto}.st{min-width:122px;flex:1;padding:15px 9px;border-right:1px solid var(--l);font-size:10.5px;font-weight:800;color:var(--m);text-align:center;cursor:pointer}.st.on{color:var(--r);background:var(--soft)}.st.done{color:var(--i)}
-.main{padding:52px 0 90px}.shell{display:grid;grid-template-columns:230px 1fr;gap:46px}.side{position:sticky;top:150px;align-self:start}.side h2{font-size:46px;margin:0 0 15px}.side p{font-size:12px;line-height:1.65;color:var(--g)}.guidebox{margin-top:18px;border-top:1px solid var(--l);padding-top:16px}.guidebox a{color:var(--r);font-weight:800}
+.main{padding:52px 0 90px}.shell{display:grid;grid-template-columns:230px minmax(0,1fr);gap:46px}.side{position:sticky;top:150px;align-self:start}.side h2{font-size:46px;margin:0 0 15px}.side p{font-size:12px;line-height:1.65;color:var(--g)}.guidebox{margin-top:18px;border-top:1px solid var(--l);padding-top:16px}.guidebox a{color:var(--r);font-weight:800}
 .panel{display:none}.panel.on{display:block}.ph h2{font-size:60px;margin:0 0 8px}.ph p{margin:0 0 28px;color:var(--g);line-height:1.65}.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.f{display:flex;flex-direction:column;gap:7px}.f.full{grid-column:1/-1}.f label,.lbl{font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--g)}.f input,.f select,.f textarea,.mi input,.mi select,.mi textarea{width:100%;padding:13px 14px;border:1px solid var(--l);border-radius:12px;background:#fff;color:var(--i);outline:0;font:inherit}.f textarea,.mi textarea{min-height:105px;resize:vertical}.f input:focus,.f select:focus,.f textarea:focus,.mi input:focus,.mi select:focus,.mi textarea:focus{border-color:#e1261c88;box-shadow:0 0 0 3px #e1261c10}
 .req:after{content:" *";color:var(--r)}.hint,.note{font-size:11.5px;line-height:1.55;color:var(--g)}.notice{background:#fff;border:1px solid var(--l);border-radius:15px;padding:15px;margin:16px 0;color:var(--g);font-size:12px;line-height:1.6}.notice strong{color:var(--i)}
 .checks{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:9px}.check{border:1px solid var(--l);background:#fff;padding:11px;border-radius:11px;font-size:12px}
@@ -53,7 +53,11 @@ a{color:inherit;text-decoration:none}.w{max-width:1160px;margin:auto;padding:0 2
   .grid,.mgrid,.uploads{grid-template-columns:1fr;gap:13px}
   .checks{grid-template-columns:1fr 1fr;gap:8px}
   .check{min-height:46px;padding:10px}
-  .hr{grid-template-columns:62px 66px 1fr 1fr;gap:6px;padding:10px}
+  .shell>section,.hours{min-width:0}
+  .hr{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;padding:12px}
+  .hr b{grid-column:1;grid-row:1}.hr label{grid-column:2;grid-row:1}
+  .hr .o{grid-column:1;grid-row:2}.hr .c{grid-column:2;grid-row:2}
+  .hr input[type=time]{min-width:0;width:100%;min-height:48px}
   .actions{position:fixed;left:0;right:0;bottom:0;z-index:70;background:#fff;border-top:1px solid var(--l);padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:grid;grid-template-columns:auto 1fr;gap:9px;box-shadow:0 -10px 35px #2c21120f}
   .actions .btn{width:100%;min-height:52px;font-size:14px}.actions #prev{width:52px;padding:0}.actions #send{grid-column:2}
   .consent-item{padding:14px}.up{padding:16px}
@@ -162,13 +166,13 @@ a{color:inherit;text-decoration:none}.w{max-width:1160px;margin:auto;padding:0 2
 <div class="panel">
 <div class="ph"><h2 class="display">7. Waktu operasi.</h2><p>Tandakan hari tutup dan masukkan waktu buka/tutup sebenar.</p></div>
 <div class="hours">
-<div class="hr" data-d="isnin"><b>Isnin</b><label><input class="closed" type="checkbox"> Tutup</label><input class="o" type="time" value="09:00"><input class="c" type="time" value="22:00"></div>
-<div class="hr" data-d="selasa"><b>Selasa</b><label><input class="closed" type="checkbox"> Tutup</label><input class="o" type="time" value="09:00"><input class="c" type="time" value="22:00"></div>
-<div class="hr" data-d="rabu"><b>Rabu</b><label><input class="closed" type="checkbox"> Tutup</label><input class="o" type="time" value="09:00"><input class="c" type="time" value="22:00"></div>
-<div class="hr" data-d="khamis"><b>Khamis</b><label><input class="closed" type="checkbox"> Tutup</label><input class="o" type="time" value="09:00"><input class="c" type="time" value="22:00"></div>
-<div class="hr" data-d="jumaat"><b>Jumaat</b><label><input class="closed" type="checkbox"> Tutup</label><input class="o" type="time" value="09:00"><input class="c" type="time" value="22:00"></div>
-<div class="hr" data-d="sabtu"><b>Sabtu</b><label><input class="closed" type="checkbox"> Tutup</label><input class="o" type="time" value="09:00"><input class="c" type="time" value="22:00"></div>
-<div class="hr" data-d="ahad"><b>Ahad</b><label><input class="closed" type="checkbox"> Tutup</label><input class="o" type="time" value="09:00"><input class="c" type="time" value="22:00"></div>
+<div class="hr" data-d="isnin"><b>Isnin</b><label><input class="closed" type="checkbox"> Tutup</label><input class="o" type="time" aria-label="Isnin — Waktu buka"><input class="c" type="time" aria-label="Isnin — Waktu tutup"></div>
+<div class="hr" data-d="selasa"><b>Selasa</b><label><input class="closed" type="checkbox"> Tutup</label><input class="o" type="time" aria-label="Selasa — Waktu buka"><input class="c" type="time" aria-label="Selasa — Waktu tutup"></div>
+<div class="hr" data-d="rabu"><b>Rabu</b><label><input class="closed" type="checkbox"> Tutup</label><input class="o" type="time" aria-label="Rabu — Waktu buka"><input class="c" type="time" aria-label="Rabu — Waktu tutup"></div>
+<div class="hr" data-d="khamis"><b>Khamis</b><label><input class="closed" type="checkbox"> Tutup</label><input class="o" type="time" aria-label="Khamis — Waktu buka"><input class="c" type="time" aria-label="Khamis — Waktu tutup"></div>
+<div class="hr" data-d="jumaat"><b>Jumaat</b><label><input class="closed" type="checkbox"> Tutup</label><input class="o" type="time" aria-label="Jumaat — Waktu buka"><input class="c" type="time" aria-label="Jumaat — Waktu tutup"></div>
+<div class="hr" data-d="sabtu"><b>Sabtu</b><label><input class="closed" type="checkbox"> Tutup</label><input class="o" type="time" aria-label="Sabtu — Waktu buka"><input class="c" type="time" aria-label="Sabtu — Waktu tutup"></div>
+<div class="hr" data-d="ahad"><b>Ahad</b><label><input class="closed" type="checkbox"> Tutup</label><input class="o" type="time" aria-label="Ahad — Waktu buka"><input class="c" type="time" aria-label="Ahad — Waktu tutup"></div>
 </div>
 <div class="f full" style="margin-top:16px"><label>Cuti khas / perubahan waktu</label><textarea name="specialHours" maxlength="500"></textarea></div>
 </div>
@@ -326,7 +330,7 @@ function renderMenu(){
 document.getElementById('addFood').onclick=()=>addMenu('makanan');document.getElementById('addDrink').onclick=()=>addMenu('minuman');
 
 document.querySelectorAll('.closed').forEach(x=>x.onchange=()=>{const r=x.closest('.hr'),off=x.checked;r.classList.toggle('off',off);r.querySelectorAll('input[type=time]').forEach(t=>t.disabled=off)});
-function hours(){const z={};document.querySelectorAll('.hr').forEach(r=>{const closed=r.querySelector('.closed').checked;z[r.dataset.d]={closed,open:r.querySelector('.o').value||'09:00',close:r.querySelector('.c').value||'22:00'}});return z}
+function hours(){const z={};document.querySelectorAll('.hr').forEach(r=>{const closed=r.querySelector('.closed').checked;z[r.dataset.d]={closed,open:r.querySelector('.o').value||'',close:r.querySelector('.c').value||''}});return z}
 async function apiJson(body){const r=await fetch(EP,{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify(body)}),d=await r.json().catch(()=>({}));if(!r.ok||!d.ok){const e=new Error(d.error||'request_failed');e.data=d;throw e}return d}
 async function upload(draftId,draftToken,role,f,extra={}){
   let lastError=null;

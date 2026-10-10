@@ -22,6 +22,23 @@ function gaps(r:any,media:any[],evidence:any[],menus:any[]){const out=Object.ent
  if(r.merchant_terms_accepted!==true)out.push('Rekod penerimaan terma merchant');
  return out;
 }
+function draftQuality(x:any,files:any[]){
+ const roles=new Set(files.map(f=>f.role)),missing:string[]=[],invalid:string[]=[];
+ const text=(v:any)=>typeof v==='string'?v.trim():'';
+ const phone=(v:any)=>/^\+?[0-9][0-9\s-]{7,18}$/.test(text(v));
+ const email=(v:any)=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text(v));
+ const time=(v:any)=>/^([01]\d|2[0-3]):[0-5]\d$/.test(text(v));
+ const hours=['isnin','selasa','rabu','khamis','jumaat','sabtu','ahad'].every(d=>{const h=x.openingHours?.[d];return h&&typeof h.closed==='boolean'&&(h.closed||(time(h.open)&&time(h.close)&&h.open!==h.close));});
+ const coords=Number.isFinite(x.latitude)&&Number.isFinite(x.longitude)&&Math.abs(x.latitude)<=90&&Math.abs(x.longitude)<=180;
+ const checks:any={ownerName:text(x.ownerName).length>=2,contactName:text(x.contactName).length>=2,contact:phone(x.contactPhone)||email(x.contactEmail),shopName:text(x.displayName||x.officialName).length>=2,primaryCategory:!!text(x.primaryCategory),addressLine1:!!text(x.addressLine1),state:!!text(x.state),city:!!text(x.city),postcode:/^\d{5}$/.test(text(x.postcode)),location:!!text(x.googleMapsUrl)||coords,shopContact:phone(x.phone)||phone(x.whatsapp),description:text(x.shortDescription).length>=20,cuisineTags:Array.isArray(x.cuisineTags)&&x.cuisineTags.length>0,foodTags:Array.isArray(x.foodTags)&&x.foodTags.length>0,openingHours:hours,storefront:roles.has('storefront'),foodPhoto:roles.has('food'),menuPhoto:roles.has('menu'),evidence:roles.has('evidence'),menuItems:Array.isArray(x.menuItems)&&x.menuItems.some((m:any)=>text(m.name).length>=2&&text(m.category).length>=2&&m.price!==null&&Number.isFinite(m.price)),consent:x.consent===true&&x.privacyNoticeAccepted===true&&x.termsAccepted===true&&x.accuracy===true};
+ for(const [name,ok] of Object.entries(checks))if(!ok)missing.push(name);
+ for(const name of ['contactPhone','phone','whatsapp'])if(text(x[name])&&!phone(x[name]))invalid.push(name);
+ if(text(x.contactEmail)&&!email(x.contactEmail))invalid.push('contactEmail');
+ if(text(x.postcode)&&!checks.postcode)invalid.push('postcode');
+ if((x.latitude!=null||x.longitude!=null)&&!coords)invalid.push('coordinates');
+ for(const name of ['website','instagram','facebook','tiktok','googleMapsUrl'])if(text(x[name])){try{const u=new URL(x[name]);if(u.protocol!=='https:'||u.username||u.password)invalid.push(name)}catch{invalid.push(name)}}
+ return {missing:[...missing,'Belum selesai dihantar'],invalid_fields:invalid,completion_score:Math.round(((21-missing.length)/21)*100)};
+}
 function consentFields(x:any,legacy=false){const get=(k:string)=>typeof x[k]==='boolean'?x[k]:null;return {processing_consent:get('consent'),privacy_notice_accepted:get('privacyNoticeAccepted'),merchant_terms_accepted:get('termsAccepted'),accuracy_confirmed:get('accuracy'),marketing_opt_in:get('marketingOptIn'),consent_record_status:legacy?'legacy_unavailable':x.consent===true&&x.privacyNoticeAccepted===true&&x.termsAccepted===true&&x.accuracy===true?'complete':x.consentAcknowledged===true?'snapshot_acknowledged':'not_recorded'};}
 function safeUrl(value:string){try{const u=new URL(value);return ['https:','http:'].includes(u.protocol)?u.href:null;}catch{return null;}}
 Deno.serve(async(req:Request)=>{
@@ -54,7 +71,7 @@ Deno.serve(async(req:Request)=>{
  }
  if(p.action==='dashboard'){
   const d=await sourceData();
-  const registrations=d.registrations.map(r=>({...r,record_type:'registration',intake_kind:'FULL',completion_score:100,invalid_fields:[],missing:gaps(r,d.media,d.evidence,d.menus),media_count:d.media.filter(x=>x.registration_id===r.id).length,menu_count:(d.menus.find(x=>x.registration_id===r.id)?.menu_items||[]).length,review:d.reviews.find(x=>x.entity_type==='registration'&&x.entity_id===r.id)||null,sync:d.sync.find(x=>x.registration_id===r.id)||null}));
+  const registrations=d.registrations.map(r=>({...r,record_type:'registration',intake_kind:'FULL',completion_score:Math.max(0,Math.round((1-gaps(r,d.media,d.evidence,d.menus).length/24)*100)),invalid_fields:[],missing:gaps(r,d.media,d.evidence,d.menus),media_count:d.media.filter(x=>x.registration_id===r.id).length,menu_count:(d.menus.find(x=>x.registration_id===r.id)?.menu_items||[]).length,review:d.reviews.find(x=>x.entity_type==='registration'&&x.entity_id===r.id)||null,sync:d.sync.find(x=>x.registration_id===r.id)||null}));
   const partials=d.partials.map((r:any)=>{const x=r.payload||{};return {
     id:r.id,intake_kind:'PARTIAL',record_type:'partial',reference_code:r.reference_code,status:r.status,completion_score:r.completion_score||0,
     missing:(r.missing_fields||[]),invalid_fields:r.invalid_fields||[],created_at:r.created_at,updated_at:r.updated_at,
@@ -74,7 +91,7 @@ Deno.serve(async(req:Request)=>{
     const fingerprint=(id:string)=>d.draftFiles.filter((f:any)=>f.draft_id===id).map((f:any)=>f.role+':'+f.size_bytes).sort().join('|');
     const original=privateDrafts.find((a:any)=>a.id===r.id);
     const retries=legacy?privateDrafts.filter((a:any)=>a.id!==r.id&&!a.registration_id&&!a.payload_snapshot&&a.ip_hash===original?.ip_hash&&Math.abs(Date.parse(a.created_at)-Date.parse(r.created_at))<=15*60000&&fingerprint(a.id)===fingerprint(r.id)).map((a:any)=>a.id):[];
-    return {id:r.id,intake_kind:legacy?'LEGACY DRAFT':'DRAFT',legacy_warning:legacy?'Legacy draft — fail berjaya diterima tetapi data teks tidak pernah sampai ke server.':null,recovery_status:legacy?'recoverable_media_only':'snapshot_available',possible_retry_ids:retries,record_type:'draft',reference_code:'DRAFT-'+String(r.id).slice(0,8).toUpperCase(),status:r.status,completion_score:Math.min(90,Math.round((basics/6)*50)+Math.min(40,files.length*5)),missing:['Belum selesai dihantar'],invalid_fields:[],created_at:r.created_at,updated_at:r.updated_at,display_name:x.displayName||x.officialName||'Draft dengan '+files.length+' fail',official_name:x.officialName||'',owner_name:x.ownerName||'',contact_name:x.contactName||x.ownerName||'',contact_email:x.contactEmail||'',contact_phone:x.contactPhone||x.whatsapp||x.phone||'',whatsapp:x.whatsapp||'',city:x.city||'',state:x.state||'',primary_category:x.primaryCategory||'',media_count:media,menu_count:Array.isArray(x.menuItems)?x.menuItems.length:menuImages,review:null,sync:{sync_status:'awaiting_information'},file_count:files.length};
+    return {id:r.id,intake_kind:legacy?'LEGACY DRAFT':'DRAFT',legacy_warning:legacy?'Legacy draft — fail berjaya diterima tetapi data teks tidak pernah sampai ke server.':null,recovery_status:legacy?'recoverable_media_only':'snapshot_available',possible_retry_ids:retries,record_type:'draft',reference_code:'DRAFT-'+String(r.id).slice(0,8).toUpperCase(),status:r.status,...draftQuality(x,files),created_at:r.created_at,updated_at:r.updated_at,display_name:x.displayName||x.officialName||'Draft dengan '+files.length+' fail',official_name:x.officialName||'',owner_name:x.ownerName||'',contact_name:x.contactName||x.ownerName||'',contact_email:x.contactEmail||'',contact_phone:x.contactPhone||x.whatsapp||x.phone||'',whatsapp:x.whatsapp||'',city:x.city||'',state:x.state||'',primary_category:x.primaryCategory||'',media_count:media,menu_count:Array.isArray(x.menuItems)?x.menuItems.length:menuImages,review:null,sync:{sync_status:'awaiting_information'},file_count:files.length};
   });
   const intake_queue=[...registrations,...partials,...uploadDrafts].sort((a:any,b:any)=>String(b.created_at).localeCompare(String(a.created_at)));
   return response({ok:true,registrations,intake_queue,partials,upload_drafts:uploadDrafts,waitlist:d.waitlist.map(r=>({...r,review:d.reviews.find(x=>x.entity_type==='waitlist'&&x.entity_id===r.id)||null})).sort((a,b)=>b.created_at.localeCompare(a.created_at)),analytics:checked(analytics),ios,cities,contacts,drafts,refreshed_at:new Date().toISOString()});
@@ -92,7 +109,7 @@ Deno.serve(async(req:Request)=>{
   async function signed(rows:any[],bucket:string){return await Promise.all(rows.map(async r=>{const s=await db.storage.from(bucket).createSignedUrl(r.storage_key,600);return {...r,url:s.error?null:safeUrl(s.data.signedUrl),file_error:!!s.error};}));}
   function partialRow(partial:any){const x=partial.payload||{};return {
     id:partial.id,reference_code:partial.reference_code,status:partial.status,
-    owner_name:x.ownerName||'',representative_role:x.representativeRole||'owner',contact_name:partial.contact_name||x.contactName||'',contact_phone:partial.contact_phone||x.contactPhone||'',contact_email:partial.contact_email||x.contactEmail||'',
+    owner_name:x.ownerName||'',representative_role:x.representativeRole||null,contact_name:partial.contact_name||x.contactName||'',contact_phone:partial.contact_phone||x.contactPhone||'',contact_email:partial.contact_email||x.contactEmail||'',
     legal_name:x.legalName||'',registration_number:x.registrationNumber||'',official_name:x.officialName||partial.display_name||'',display_name:partial.display_name||x.displayName||x.officialName||'',branch_name:x.branchName||'',
     address_line1:x.addressLine1||'',address_line2:x.addressLine2||'',state:x.state||'',district:x.district||'',city:x.city||'',locality:x.locality||'',postcode:x.postcode||'',google_maps_url:x.googleMapsUrl||'',latitude:x.latitude??null,longitude:x.longitude??null,
     business_phone:x.phone||'',whatsapp:x.whatsapp||'',website:x.website||'',instagram:x.instagram||'',facebook:x.facebook||'',tiktok:x.tiktok||'',
@@ -103,7 +120,7 @@ Deno.serve(async(req:Request)=>{
   };}
   function draftRow(draft:any){const x=draft.payload_snapshot||{};return {
     id:draft.id,intake_kind:draft.payload_snapshot?'DRAFT':'LEGACY DRAFT',reference_code:'DRAFT-'+String(draft.id).slice(0,8).toUpperCase(),status:draft.status,
-    owner_name:x.ownerName||'',representative_role:x.representativeRole||'owner',contact_name:x.contactName||'',contact_phone:x.contactPhone||'',contact_email:x.contactEmail||'',legal_name:x.legalName||'',registration_number:x.registrationNumber||'',
+    owner_name:x.ownerName||'',representative_role:x.representativeRole||null,contact_name:x.contactName||'',contact_phone:x.contactPhone||'',contact_email:x.contactEmail||'',legal_name:x.legalName||'',registration_number:x.registrationNumber||'',
     official_name:x.officialName||'',display_name:x.displayName||x.officialName||'Draft upload',branch_name:x.branchName||'',address_line1:x.addressLine1||'',address_line2:x.addressLine2||'',state:x.state||'',district:x.district||'',city:x.city||'',locality:x.locality||'',postcode:x.postcode||'',google_maps_url:x.googleMapsUrl||'',latitude:x.latitude??null,longitude:x.longitude??null,
     business_phone:x.phone||'',whatsapp:x.whatsapp||'',website:x.website||'',instagram:x.instagram||'',facebook:x.facebook||'',tiktok:x.tiktok||'',primary_category:x.primaryCategory||'',cuisine_tags:x.cuisineTags||[],food_tags:x.foodTags||[],signature_dishes:x.signatureDishes||[],price_range:x.priceRange||'unknown',service_modes:x.serviceModes||[],amenities:x.amenities||[],short_description:x.shortDescription||'',opening_hours:x.openingHours||{},special_hours:x.specialHours||'',
     ...consentFields(x,!draft.payload_snapshot),source_page:x.sourcePage||'',created_at:draft.created_at,updated_at:draft.updated_at,snapshot_saved_at:draft.snapshot_saved_at,expires_at:draft.expires_at

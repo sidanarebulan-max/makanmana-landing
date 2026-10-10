@@ -47,7 +47,7 @@ function validHours(v:any){
   const tm=/^([01]\d|2[0-3]):[0-5]\d$/;
   return days.every(d=>{
     const x=v[d];
-    return x&&typeof x.closed==="boolean"&&tm.test(String(x.open||""))&&tm.test(String(x.close||""))&&(x.closed||x.open!==x.close);
+    return x&&typeof x.closed==="boolean"&&(x.closed||(tm.test(String(x.open||""))&&tm.test(String(x.close||""))&&x.open!==x.close));
   });
 }
 function cleanMenu(input:any){
@@ -365,11 +365,13 @@ Deno.serve(async(req:Request)=>{
           add(roles.has("food"),"foodPhoto");
           add(roles.has("menu"),"menuPhoto");
           add(roles.has("evidence"),"evidence");
-          add(rawMenu.length>0,"menuItems");
+          add(menuItems.length>0,"menuItems");
 
           if(!consentOk)missing.push("consent");
           const invalid:string[]=[];
           if(rawMenu.length&&errs.includes("menuItems"))invalid.push("menuItems");
+          for(const name of ["representativeRole","priceRange","evidenceType","authorizationLetter"])if(errs.includes(name))invalid.push(name);
+          if(fileErrs.includes("menuImage"))invalid.push("menuImage");
           if(contactEmail&&!email(contactEmail))invalid.push("contactEmail");
           if(contactPhone&&!phone(contactPhone))invalid.push("contactPhone");
           if(businessPhone&&!phone(businessPhone))invalid.push("phone");
