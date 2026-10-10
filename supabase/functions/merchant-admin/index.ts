@@ -9,7 +9,7 @@ async function hashPassword(password:string,salt:string,iterations:number){const
 function equal(a:string,b:string){let d=a.length^b.length;for(let i=0;i<Math.max(a.length,b.length);i++)d|=(a.charCodeAt(i)||0)^(b.charCodeAt(i)||0);return d===0;}
 function checked<T>(r:{data:T,error:unknown}){if(r.error)throw r.error;return r.data;}
 async function all(table:string,filter?:[string,string]){const rows:any[]=[];for(let start=0;;start+=500){let q=db.from(table).select('*').order(({merchant_intake_menu_proposals:'registration_id',merchant_control_center_sync:'registration_id',merchant_admin_reviews:'entity_id'} as Record<string,string>)[table]||'id').range(start,start+499);if(filter)q=q.eq(...filter);const part=checked(await q)||[];rows.push(...part);if(part.length<500)break;}return rows;}
-async function sourceData(){const [registrations,waitlist,reviews,media,evidence,menus,sync]=await Promise.all([all('merchant_registrations'),all('merchant_waitlist'),all('merchant_admin_reviews'),all('merchant_media'),all('merchant_evidence'),all('merchant_intake_menu_proposals'),all('merchant_control_center_sync')]);return {registrations,waitlist,reviews,media,evidence,menus,sync};}
+async function sourceData(){const [registrations,partials,waitlist,reviews,media,evidence,menus,sync,draftFiles]=await Promise.all([all('merchant_registrations'),all('merchant_partial_registrations'),all('merchant_waitlist'),all('merchant_admin_reviews'),all('merchant_media'),all('merchant_evidence'),all('merchant_intake_menu_proposals'),all('merchant_control_center_sync'),all('merchant_intake_draft_files')]);return {registrations,partials,waitlist,reviews,media,evidence,menus,sync,draftFiles};}
 const required:Record<string,string>={owner_name:'Nama pemilik',contact_name:'Nama untuk dihubungi',contact_phone:'Telefon wakil',contact_email:'E-mel wakil',official_name:'Nama rasmi kedai',display_name:'Nama paparan',address_line1:'Alamat',state:'Negeri',district:'Daerah',city:'Bandar',postcode:'Poskod',business_phone:'Telefon kedai',primary_category:'Kategori',short_description:'Penerangan kedai'};
 function gaps(r:any,media:any[],evidence:any[],menus:any[]){const out=Object.entries(required).filter(([k])=>!String(r[k]??'').trim()).map(([,v])=>v);
  if(!r.google_maps_url&&(r.latitude==null||r.longitude==null))out.push('Google Maps atau koordinat');
@@ -52,9 +52,27 @@ Deno.serve(async(req:Request)=>{
   checked(await db.from('merchant_admin_sessions').delete().neq('token_hash',''));return response({ok:true});
  }
  if(p.action==='dashboard'){
-  const d=await sourceData();const registrations=d.registrations.map(r=>({...r,missing:gaps(r,d.media,d.evidence,d.menus),media_count:d.media.filter(x=>x.registration_id===r.id).length,menu_count:(d.menus.find(x=>x.registration_id===r.id)?.menu_items||[]).length,review:d.reviews.find(x=>x.entity_type==='registration'&&x.entity_id===r.id)||null,sync:d.sync.find(x=>x.registration_id===r.id)||null})).sort((a,b)=>b.created_at.localeCompare(a.created_at));
-  const [analytics,ios,cities,contacts,drafts]=await Promise.all([db.rpc('merchant_admin_analytics',{p_days:Number(p.days)||30}),all('ios_waitlist'),all('city_requests'),all('contact_submissions'),db.from('merchant_intake_drafts').select('id,status,created_at,expires_at,registration_id').order('created_at',{ascending:false}).limit(100)]);
-  return response({ok:true,registrations,waitlist:d.waitlist.map(r=>({...r,review:d.reviews.find(x=>x.entity_type==='waitlist'&&x.entity_id===r.id)||null})).sort((a,b)=>b.created_at.localeCompare(a.created_at)),analytics:checked(analytics),ios,cities,contacts,drafts:checked(drafts),refreshed_at:new Date().toISOString()});
+  const d=await sourceData();
+  const registrations=d.registrations.map(r=>({...r,record_type:'registration',completion_score:100,missing:gaps(r,d.media,d.evidence,d.menus),media_count:d.media.filter(x=>x.registration_id===r.id).length,menu_count:(d.menus.find(x=>x.registration_id===r.id)?.menu_items||[]).length,review:d.reviews.find(x=>x.entity_type==='registration'&&x.entity_id===r.id)||null,sync:d.sync.find(x=>x.registration_id===r.id)||null}));
+  const partials=d.partials.map((r:any)=>{const x=r.payload||{};return {
+    id:r.id,record_type:'partial',reference_code:r.reference_code,status:r.status,completion_score:r.completion_score||0,
+    missing:(r.missing_fields||[]),invalid_fields:r.invalid_fields||[],created_at:r.created_at,updated_at:r.updated_at,
+    display_name:r.display_name||x.displayName||x.officialName||'Partial registration',official_name:x.officialName||r.display_name||'',
+    owner_name:x.ownerName||'',contact_name:r.contact_name||x.contactName||x.ownerName||'',contact_email:r.contact_email||x.contactEmail||'',
+    contact_phone:r.contact_phone||x.contactPhone||x.whatsapp||x.phone||'',whatsapp:x.whatsapp||'',city:x.city||'',state:x.state||'',
+    primary_category:x.primaryCategory||'',media_count:Array.isArray(r.file_manifest)?r.file_manifest.filter((f:any)=>f.role!=='evidence'&&f.role!=='menu-item').length:0,
+    menu_count:Array.isArray(r.menu_items)?r.menu_items.length:0,review:null,sync:null,draft_id:r.draft_id
+  }});
+  const [analytics,ios,cities,contacts,draftsRes]=await Promise.all([db.rpc('merchant_admin_analytics',{p_days:Number(p.days)||30}),all('ios_waitlist'),all('city_requests'),all('contact_submissions'),db.from('merchant_intake_drafts').select('id,status,created_at,updated_at,expires_at,registration_id,payload_snapshot,snapshot_saved_at').order('created_at',{ascending:false}).limit(300)]);
+  const drafts=checked(draftsRes)||[];
+  const partialDraftIds=new Set(d.partials.map((x:any)=>String(x.draft_id||'')));
+  const uploadDrafts=drafts.filter((r:any)=>r.status==='draft'&&!r.registration_id&&!partialDraftIds.has(String(r.id))&&d.draftFiles.some((f:any)=>f.draft_id===r.id)).map((r:any)=>{
+    const x=r.payload_snapshot||{},files=d.draftFiles.filter((f:any)=>f.draft_id===r.id),media=files.filter((f:any)=>f.role!=='evidence'&&f.role!=='menu-item').length,menuImages=files.filter((f:any)=>f.role==='menu-item').length;
+    const basics=[x.ownerName,x.contactName,x.contactPhone||x.contactEmail,x.displayName||x.officialName,x.primaryCategory,x.city||x.state].filter(Boolean).length;
+    return {id:r.id,record_type:'draft',reference_code:'DRAFT-'+String(r.id).slice(0,8).toUpperCase(),status:'draft',completion_score:Math.min(90,Math.round((basics/6)*50)+Math.min(40,files.length*5)),missing:['Belum selesai dihantar'],invalid_fields:[],created_at:r.created_at,updated_at:r.updated_at,display_name:x.displayName||x.officialName||'Draft dengan '+files.length+' fail',official_name:x.officialName||'',owner_name:x.ownerName||'',contact_name:x.contactName||x.ownerName||'',contact_email:x.contactEmail||'',contact_phone:x.contactPhone||x.whatsapp||x.phone||'',whatsapp:x.whatsapp||'',city:x.city||'',state:x.state||'',primary_category:x.primaryCategory||'',media_count:media,menu_count:Array.isArray(x.menuItems)?x.menuItems.length:menuImages,review:null,sync:null,file_count:files.length};
+  });
+  const intake_queue=[...registrations,...partials,...uploadDrafts].sort((a:any,b:any)=>String(b.created_at).localeCompare(String(a.created_at)));
+  return response({ok:true,registrations,intake_queue,partials,upload_drafts:uploadDrafts,waitlist:d.waitlist.map(r=>({...r,review:d.reviews.find(x=>x.entity_type==='waitlist'&&x.entity_id===r.id)||null})).sort((a,b)=>b.created_at.localeCompare(a.created_at)),analytics:checked(analytics),ios,cities,contacts,drafts,refreshed_at:new Date().toISOString()});
  }
  if(p.action==='activity'){
   const days=[7,30,90].includes(Number(p.days))?Number(p.days):30;
@@ -65,12 +83,30 @@ Deno.serve(async(req:Request)=>{
   if(result.error)throw result.error;return response({ok:true,events:result.data,total:result.count,cutoff});
  }
  if(p.action==='detail'){
-  if(!['registration','waitlist'].includes(p.type)||!/^[-a-f0-9]{36}$/.test(p.id))return response({error:'invalid_entity'},400);
-  const row=checked(await db.from(p.type==='registration'?'merchant_registrations':'merchant_waitlist').select('*').eq('id',p.id).single());
-  const events=checked(await db.from('merchant_admin_review_events').select('*').eq('entity_type',p.type).eq('entity_id',p.id).order('created_at',{ascending:false}).limit(100));
-  if(p.type==='waitlist')return response({ok:true,row,events});
-  const [media,evidence,menuImages,menu,workflow]=await Promise.all([all('merchant_media',['registration_id',p.id]),all('merchant_evidence',['registration_id',p.id]),all('merchant_menu_media',['registration_id',p.id]),db.from('merchant_intake_menu_proposals').select('*').eq('registration_id',p.id).maybeSingle(),db.from('merchant_workflow_events').select('*').eq('registration_id',p.id).order('created_at',{ascending:false}).limit(100)]);
+  if(!['registration','partial','draft','waitlist'].includes(p.type)||!/^[-a-f0-9]{36}$/.test(p.id))return response({error:'invalid_entity'},400);
   async function signed(rows:any[],bucket:string){return await Promise.all(rows.map(async r=>{const s=await db.storage.from(bucket).createSignedUrl(r.storage_key,600);return {...r,url:s.error?null:safeUrl(s.data.signedUrl),file_error:!!s.error};}));}
+  if(p.type==='waitlist'){
+    const row=checked(await db.from('merchant_waitlist').select('*').eq('id',p.id).single());
+    const events=checked(await db.from('merchant_admin_review_events').select('*').eq('entity_type','waitlist').eq('entity_id',p.id).order('created_at',{ascending:false}).limit(100));
+    return response({ok:true,row,events});
+  }
+  if(p.type==='partial'){
+    const partial=checked(await db.from('merchant_partial_registrations').select('*').eq('id',p.id).single()),x=partial.payload||{};
+    const files=checked(await db.from('merchant_intake_draft_files').select('*').eq('draft_id',partial.draft_id).order('created_at',{ascending:true}));
+    const media=files.filter((f:any)=>f.role!=='evidence'&&f.role!=='menu-item'),evidence=files.filter((f:any)=>f.role==='evidence'),menuImages=files.filter((f:any)=>f.role==='menu-item');
+    const row={...x,id:partial.id,reference_code:partial.reference_code,status:partial.status,completion_score:partial.completion_score,missing_fields:partial.missing_fields,invalid_fields:partial.invalid_fields,created_at:partial.created_at,updated_at:partial.updated_at,display_name:partial.display_name||x.displayName||x.officialName,contact_name:partial.contact_name||x.contactName,contact_email:partial.contact_email||x.contactEmail,contact_phone:partial.contact_phone||x.contactPhone,draft_id:partial.draft_id};
+    return response({ok:true,row,events:[],media:await signed(media,'merchant-intake-media'),evidence:await signed(evidence,'merchant-intake-evidence'),menu_images:await signed(menuImages,'merchant-intake-media'),menu:partial.menu_items||[],workflow:[],partial:true});
+  }
+  if(p.type==='draft'){
+    const draft=checked(await db.from('merchant_intake_drafts').select('*').eq('id',p.id).single()),x=draft.payload_snapshot||{};
+    const files=checked(await db.from('merchant_intake_draft_files').select('*').eq('draft_id',p.id).order('created_at',{ascending:true}));
+    const media=files.filter((f:any)=>f.role!=='evidence'&&f.role!=='menu-item'),evidence=files.filter((f:any)=>f.role==='evidence'),menuImages=files.filter((f:any)=>f.role==='menu-item');
+    const row={...x,id:draft.id,reference_code:'DRAFT-'+String(draft.id).slice(0,8).toUpperCase(),status:draft.status,created_at:draft.created_at,updated_at:draft.updated_at,expires_at:draft.expires_at,snapshot_saved_at:draft.snapshot_saved_at,file_count:files.length};
+    return response({ok:true,row,events:[],media:await signed(media,'merchant-intake-media'),evidence:await signed(evidence,'merchant-intake-evidence'),menu_images:await signed(menuImages,'merchant-intake-media'),menu:Array.isArray(x.menuItems)?x.menuItems:[],workflow:[],draft:true});
+  }
+  const row=checked(await db.from('merchant_registrations').select('*').eq('id',p.id).single());
+  const events=checked(await db.from('merchant_admin_review_events').select('*').eq('entity_type','registration').eq('entity_id',p.id).order('created_at',{ascending:false}).limit(100));
+  const [media,evidence,menuImages,menu,workflow]=await Promise.all([all('merchant_media',['registration_id',p.id]),all('merchant_evidence',['registration_id',p.id]),all('merchant_menu_media',['registration_id',p.id]),db.from('merchant_intake_menu_proposals').select('*').eq('registration_id',p.id).maybeSingle(),db.from('merchant_workflow_events').select('*').eq('registration_id',p.id).order('created_at',{ascending:false}).limit(100)]);
   return response({ok:true,row,events,media:await signed(media,'merchant-intake-media'),evidence:await signed(evidence,'merchant-intake-evidence'),menu_images:await signed(menuImages,'merchant-intake-media'),menu:checked(menu)?.menu_items||[],workflow:checked(workflow)});
  }
  if(p.action==='save_review'){
